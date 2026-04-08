@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Home — StreetDoko</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    /* Hero */
+    .hero {
+      background: var(--ink);
+      padding: 96px 0 80px;
+      position: relative; overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse at 70% 40%, rgba(45,90,39,.35) 0%, transparent 70%);
+    }
+    .hero-content { position: relative; z-index: 1; }
+    .hero h1 { color: #fff; max-width: 680px; margin-bottom: 16px; }
+    .hero-sub { color: #aaa; font-size: 17px; max-width: 520px; margin-bottom: 36px; }
+    .hero-cta { display: flex; gap: 14px; flex-wrap: wrap; }
+
+    /* Collect info strip */
+    .collect-strip {
+      background: var(--green-pale); border-bottom: 1px solid var(--border);
+      padding: 12px 0;
+    }
+    .collect-strip .container {
+      display: flex; align-items: center; justify-content: center; gap: 32px; flex-wrap: wrap;
+    }
+    .collect-item { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; color: var(--green); }
+    .collect-item span:first-child { font-size: 16px; }
+
+    /* Traders row */
+    .traders-section { background: var(--white); }
+
+    /* Deals */
+    .deals-section { background: var(--cream); }
+    .deals-header {
+      background: var(--ink); color: #fff; padding: 28px 32px;
+      border-radius: var(--radius-lg); margin-bottom: 28px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .deals-header h2 { color: #fff; }
+    .deals-header p { color: #aaa; font-size: 14px; margin-top: 4px; }
+
+    /* Reviews */
+    .reviews-section { background: var(--white); }
+
+    /* Click & Collect CTA */
+    .collect-cta {
+      background: var(--ink); padding: 72px 0; text-align: center;
+    }
+    .collect-cta h2 { color: #fff; margin-bottom: 12px; }
+    .collect-cta p  { color: #aaa; margin-bottom: 32px; max-width: 540px; margin-inline: auto; }
+    .collect-stats {
+      display: flex; align-items: center; justify-content: center; gap: 48px;
+      margin-bottom: 36px; flex-wrap: wrap;
+    }
+    .collect-stat-item { text-align: center; }
+    .collect-stat-item .num { font-family: 'Playfair Display', serif; font-size: 2.5rem; color: #fff; font-weight: 700; }
+    .collect-stat-item .lbl { font-size: 12px; color: #888; text-transform: uppercase; letter-spacing: .5px; }
+
+    /* Featured */
+    .featured-section { background: var(--cream); }
+  </style>
+</head>
+<body>
+  <script src="navbar.js"></script>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="container hero-content">
+      <div class="hero-tagline">Fresh · Local · Click &amp; Collect</div>
+      <h1>Your local market, delivered to your hands</h1>
+      <p class="hero-sub">Shop across five specialist traders — butcher, greengrocer, fishmonger, bakery, and deli — in one seamless order.</p>
+      <div class="hero-cta">
+        <a href="browse.html" class="btn btn-primary btn-lg">Start Shopping</a>
+        <a href="slot-booking.html" class="btn btn-outline-white btn-lg">Book a Slot</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Collect info strip -->
+  <div class="collect-strip">
+    <div class="container">
+      <div class="collect-item"><span>📅</span> Wed – Fri collection</div>
+      <div class="collect-item"><span>⏰</span> Book 24 hrs in advance</div>
+      <div class="collect-item"><span>📦</span> Max 20 orders per slot</div>
+      <div class="collect-item"><span>📍</span> One collection point</div>
+    </div>
+  </div>
+
+  <!-- Our Traders -->
+  <section class="section traders-section">
+    <div class="container">
+      <div class="section-header">
+        <h2>Our Traders</h2>
+        <a href="browse.html" class="section-link">View all →</a>
+      </div>
+      <div class="grid-5">
+        <a href="browse.html?trader=butcher" class="trader-card card-hover" style="text-decoration:none;">
+          <div class="trader-card-img">🥩</div>
+          <div class="trader-card-body">
+            <div class="trader-card-name">The Butcher</div>
+            <div class="trader-card-desc">Premium cuts, freshly prepared to order</div>
+            <span class="badge badge-dark">42 items</span>
+          </div>
+        </a>
+        <a href="browse.html?trader=greengrocer" class="trader-card card-hover" style="text-decoration:none;">
+          <div class="trader-card-img">🥦</div>
+          <div class="trader-card-body">
+            <div class="trader-card-name">Greengrocer</div>
+            <div class="trader-card-desc">Seasonal fruit &amp; vegetables, direct from farm</div>
+            <span class="badge badge-green">38 items</span>
+          </div>
+        </a>
+        <a href="browse.html?trader=fishmonger" class="trader-card card-hover" style="text-decoration:none;">
+          <div class="trader-card-img">🐟</div>
+          <div class="trader-card-body">
+            <div class="trader-card-name">Fishmonger</div>
+            <div class="trader-card-desc">Fresh catch delivered twice weekly</div>
+            <span class="badge badge-dark">24 items</span>
+          </div>
+        </a>
+        <a href="browse.html?trader=bakery" class="trader-card card-hover" style="text-decoration:none;">
+          <div class="trader-card-img">🍞</div>
+          <div class="trader-card-body">
+            <div class="trader-card-name">The Bakery</div>
+            <div class="trader-card-desc">Artisan breads, pastries &amp; baked treats</div>
+            <span class="badge badge-gold">31 items</span>
+          </div>
+        </a>
+        <a href="browse.html?trader=deli" class="trader-card card-hover" style="text-decoration:none;">
+          <div class="trader-card-img">🧀</div>
+          <div class="trader-card-body">
+            <div class="trader-card-name">Delicatessen</div>
+            <div class="trader-card-desc">Specialty foods, charcuterie &amp; deli classics</div>
+            <span class="badge badge-dark">27 items</span>
+          </div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Deals -->
+  <section class="section deals-section">
+    <div class="container">
+      <div class="deals-header">
+        <div>
+          <h2>This Week's Deals</h2>
+          <p>Limited-time offers from our traders — updated every Monday</p>
+        </div>
+        <a href="browse.html" class="btn btn-outline-white btn-sm">Browse all →</a>
+      </div>
+      <div class="grid-3">
+        <!-- Deal 1 -->
+        <div class="product-card">
+          <a href="product.html" style="text-decoration:none; color:inherit;">
+          <div class="product-card-img">
+            🥩
+            <span class="discount-badge-abs">25% OFF</span>
+          </div>
+          <div class="product-card-body">
+            <div class="product-card-cat">Butcher</div>
+            <div class="product-card-trader">The Butcher</div>
+            <div class="product-card-name">Grass-fed Ribeye Steak</div>
+            <div class="product-price">
+              <span class="price">£9.00</span>
+              <span class="price-orig">£12.00</span>
+            </div>
+          </div>
+          </a>
+          <div class="product-card-footer">
+            <span class="badge badge-green">In Stock</span>
+            <a href="checkout.html" class="btn btn-primary btn-sm">Add</a>
+          </div>
+        </div>
+        <!-- Deal 2 -->
+        <div class="product-card">
+          <a href="product.html" style="text-decoration:none; color:inherit;">
+          <div class="product-card-img">
+            🍞
+            <span class="discount-badge-abs">20% OFF</span>
+          </div>
+          <div class="product-card-body">
+            <div class="product-card-cat">Bakery</div>
+            <div class="product-card-trader">The Bakery</div>
+            <div class="product-card-name">Sourdough Loaf (800g)</div>
+            <div class="product-price">
+              <span class="price">£3.20</span>
+              <span class="price-orig">£4.00</span>
+            </div>
+          </div>
+          </a>
+          <div class="product-card-footer">
+            <span class="badge badge-green">In Stock</span>
+            <a href="checkout.html" class="btn btn-primary btn-sm">Add</a>
+          </div>
+        </div>
+        <!-- Deal 3 -->
+        <div class="product-card">
+          <a href="product.html" style="text-decoration:none; color:inherit;">
+          <div class="product-card-img">
+            🧀
+            <span class="discount-badge-abs">15% OFF</span>
+          </div>
+          <div class="product-card-body">
+            <div class="product-card-cat">Deli</div>
+            <div class="product-card-trader">Delicatessen</div>
+            <div class="product-card-name">Aged Manchego (200g)</div>
+            <div class="product-price">
+              <span class="price">£5.10</span>
+              <span class="price-orig">£6.00</span>
+            </div>
+          </div>
+          </a>
+          <div class="product-card-footer">
+            <span class="badge badge-gold">Low Stock</span>
+            <a href="checkout.html" class="btn btn-primary btn-sm">Add</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Featured Products -->
+  <section class="section featured-section">
+    <div class="container">
+      <div class="section-header">
+        <h2>Featured Products</h2>
+        <a href="browse.html" class="section-link">Browse all →</a>
+      </div>
+      <div class="grid-3">
+        <div class="product-card">
+          <a href="product.html" style="text-decoration:none; color:inherit;">
+          <div class="product-card-img">🐟</div>
+          <div class="product-card-body">
+            <div class="product-card-cat">Fish</div>
+            <div class="product-card-trader">Fishmonger</div>
+            <div class="product-card-name">Atlantic Salmon Fillet</div>
+            <div class="product-price"><span class="price">£7.50</span></div>
+            <div class="freshness-bar"><div class="freshness-fill" style="width:90%"></div></div>
+          </div>
+          </a>
+          <div class="product-card-footer">
+            <a href="product.html" class="text-sm" style="color:var(--green);">Show more</a>
+            <a href="checkout.html" class="btn btn-primary btn-sm">Add</a>
+          </div>
+        </div>
+        <div class="product-card">
+          <a href="product.html" style="text-decoration:none; color:inherit;">
+          <div class="product-card-img">🥕</div>
+          <div class="product-card-body">
+            <div class="product-card-cat">Vegetable</div>
+            <div class="product-card-trader">Greengrocer</div>
+            <div class="product-card-name">Heritage Carrot Selection (1kg)</div>
+            <div class="product-price"><span class="price">£2.20</span></div>
+            <div class="freshness-bar"><div class="freshness-fill" style="width:80%"></div></div>
+          </div>
+          </a>
+          <div class="product-card-footer">
+            <a href="product.html" class="text-sm" style="color:var(--green);">Show more</a>
+            <a href="checkout.html" class="btn btn-primary btn-sm">Add</a>
+          </div>
+        </div>
+        <div class="product-card">
+          <a href="product.html" style="text-decoration:none; color:inherit;">
+          <div class="product-card-img">🥧</div>
+          <div class="product-card-body">
+            <div class="product-card-cat">Pastry</div>
+            <div class="product-card-trader">The Bakery</div>
+            <div class="product-card-name">Butter Croissant (4-pack)</div>
+            <div class="product-price"><span class="price">£4.80</span></div>
+            <div class="freshness-bar"><div class="freshness-fill" style="width:95%"></div></div>
+          </div>
+          </a>
+          <div class="product-card-footer">
+            <a href="product.html" class="text-sm" style="color:var(--green);">Show more</a>
+            <a href="checkout.html" class="btn btn-primary btn-sm">Add</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Customer Reviews -->
+  <section class="section reviews-section">
+    <div class="container">
+      <div class="section-header">
+        <h2>What Our Customers Say</h2>
+      </div>
+      <div class="grid-3">
+        <div class="review-card">
+          <div class="review-card-header">
+            <div class="review-avatar">S</div>
+            <div>
+              <div class="fw-600" style="font-size:14px;">Sarah M.</div>
+              <div class="text-xs text-muted">Harrogate</div>
+              <div class="stars mt-8">★★★★★</div>
+            </div>
+          </div>
+          <p style="font-size:13px; color:var(--ink-soft); line-height:1.6;">"Incredible quality — the ribeye was perfectly fresh and the whole ordering process was so easy. Will definitely be back every week."</p>
+          <div class="mt-12 text-xs text-muted">Grass-fed Ribeye · <a href="browse.html?trader=butcher" style="color:var(--green);">The Butcher</a></div>
+        </div>
+        <div class="review-card">
+          <div class="review-card-header">
+            <div class="review-avatar">T</div>
+            <div>
+              <div class="fw-600" style="font-size:14px;">Tom R.</div>
+              <div class="text-xs text-muted">Knaresborough</div>
+              <div class="stars mt-8">★★★★★</div>
+            </div>
+          </div>
+          <p style="font-size:13px; color:var(--ink-soft); line-height:1.6;">"Best sourdough I've had outside of London. The collection slot system works brilliantly — no queues, just grab and go."</p>
+          <div class="mt-12 text-xs text-muted">Sourdough Loaf · <a href="browse.html?trader=bakery" style="color:var(--green);">The Bakery</a></div>
+        </div>
+        <div class="review-card">
+          <div class="review-card-header">
+            <div class="review-avatar">L</div>
+            <div>
+              <div class="fw-600" style="font-size:14px;">Lena K.</div>
+              <div class="text-xs text-muted">Ripon</div>
+              <div class="stars mt-8">★★★★☆</div>
+            </div>
+          </div>
+          <p style="font-size:13px; color:var(--ink-soft); line-height:1.6;">"Supporting local traders has never been so convenient. The veg box was stunning — everything so fresh. Love this platform."</p>
+          <div class="mt-12 text-xs text-muted">Heritage Carrots · <a href="browse.html?trader=greengrocer" style="color:var(--green);">Greengrocer</a></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Click & Collect CTA -->
+  <section class="collect-cta" id="collect-cta">
+    <div class="container">
+      <h2>Ready to Collect?</h2>
+      <p>Book your collection slot and your order will be packed and ready when you arrive.</p>
+      <div class="collect-stats">
+        <div class="collect-stat-item">
+          <div class="num">3</div>
+          <div class="lbl">Collection Days</div>
+        </div>
+        <div class="collect-stat-item">
+          <div class="num">20</div>
+          <div class="lbl">Max Orders / Slot</div>
+        </div>
+        <div class="collect-stat-item">
+          <div class="num">24h</div>
+          <div class="lbl">Advance Booking</div>
+        </div>
+      </div>
+      <a href="slot-booking.html" class="btn btn-primary btn-lg">Book a Slot →</a>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-top">
+      <div class="container">
+        <div class="footer-grid">
+          <div class="footer-col">
+            <div class="footer-brand">StreetDoko</div>
+            <p class="footer-tagline">A click-and-collect marketplace connecting you with the finest local traders in your area.</p>
+          </div>
+          <div class="footer-col">
+            <h5>Quick Links</h5>
+            <ul>
+              <li><a href="homepage.html">Home</a></li>
+              <li><a href="browse.html">Shop</a></li>
+              <li><a href="about.html">About Us</a></li>
+              <li><a href="profile.html">My Account</a></li>
+            </ul>
+          </div>
+          <div class="footer-col">
+            <h5>Our Traders</h5>
+            <ul>
+              <li><a href="browse.html">The Butcher</a></li>
+              <li><a href="browse.html">Greengrocer</a></li>
+              <li><a href="browse.html">Fishmonger</a></li>
+              <li><a href="browse.html">The Bakery</a></li>
+              <li><a href="browse.html">Delicatessen</a></li>
+            </ul>
+          </div>
+          <div class="footer-col">
+            <h5>Contact</h5>
+            <p>📧 hello@streetdoko.com</p>
+            <p>📞 01423 000 000</p>
+            <p>📍 Market Hall, Town Centre</p>
+            <p style="margin-top:12px;">Collection: Wed – Fri</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="container" style="width:100%; display:flex; justify-content:space-between; align-items:center;">
+        <span>© 2026 StreetDoko. All rights reserved.</span>
+        <span><a href="#" style="color:#555; font-size:12px;">Privacy Policy</a></span>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

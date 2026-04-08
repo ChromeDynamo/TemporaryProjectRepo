@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Shop — StreetDoko</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .shop-hero {
+      background: var(--ink); padding: 48px 0 36px;
+    }
+    .shop-hero h1 { color: #fff; margin-bottom: 8px; }
+    .shop-hero p  { color: #aaa; }
+
+    /* Search bar */
+    .search-bar-wrap {
+      background: var(--white); border-bottom: 1px solid var(--border);
+      padding: 20px 0; position: sticky; top: var(--nav-h); z-index: 50;
+      box-shadow: var(--shadow-sm);
+    }
+    .search-bar {
+      display: flex; gap: 12px; align-items: center;
+    }
+    .search-input-wrap {
+      flex: 1; position: relative;
+    }
+    .search-input-wrap .search-icon {
+      position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+      font-size: 16px; color: var(--ink-muted);
+    }
+    .search-input {
+      width: 100%; padding: 12px 14px 12px 42px;
+      border: 1.5px solid var(--border); border-radius: var(--radius);
+      background: var(--cream); font-size: 14px; outline: none; transition: var(--ease);
+    }
+    .search-input:focus { border-color: var(--green); background: #fff; box-shadow: 0 0 0 3px var(--green-pale); }
+
+    /* Trader tabs */
+    .trader-tabs-bar {
+      background: var(--cream-dark); border-bottom: 1px solid var(--border);
+      padding: 0;
+    }
+    .trader-tabs-bar .container { overflow-x: auto; }
+    .trader-tabs-inner { display: flex; gap: 0; white-space: nowrap; }
+    .trader-tab {
+      padding: 14px 20px; font-size: 13px; font-weight: 600; color: var(--ink-muted);
+      border-bottom: 2px solid transparent; cursor: pointer; transition: var(--ease);
+      flex-shrink: 0; background: none; display: flex; align-items: center; gap: 6px;
+    }
+    .trader-tab:hover { color: var(--green); }
+    .trader-tab.active { color: var(--green); border-bottom-color: var(--green); background: rgba(45,90,39,.05); }
+
+    /* Layout */
+    .shop-layout {
+      display: grid;
+      grid-template-columns: 240px 1fr;
+      gap: 32px;
+      padding-block: 36px;
+      align-items: start;
+    }
+
+    /* Sidebar */
+    .shop-sidebar { position: sticky; top: calc(var(--nav-h) + 120px); }
+
+    /* Range slider */
+    input[type="range"] {
+      width: 100%; accent-color: var(--green); margin-top: 8px;
+    }
+    .price-range-display { display: flex; justify-content: space-between; font-size: 12px; color: var(--ink-muted); margin-top: 4px; }
+
+    /* Product grid */
+    .products-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+    .products-header p { font-size: 13px; color: var(--ink-muted); }
+    .sort-select { padding: 7px 12px; border: 1.5px solid var(--border); border-radius: var(--radius); font-size: 13px; background: var(--white); outline: none; cursor: pointer; }
+
+    .product-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+
+    /* Pagination */
+    .pagination { display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 36px; }
+    .page-btn {
+      width: 36px; height: 36px; border-radius: 8px; border: 1.5px solid var(--border);
+      background: var(--white); font-size: 13px; font-weight: 600; cursor: pointer; transition: var(--ease);
+      display: flex; align-items: center; justify-content: center; color: var(--ink-soft);
+    }
+    .page-btn.active { background: var(--green); color: #fff; border-color: var(--green); }
+    .page-btn:hover:not(.active) { border-color: var(--green); color: var(--green); }
+
+    @media (max-width: 900px) {
+      .shop-layout { grid-template-columns: 1fr; }
+      .shop-sidebar { position: static; }
+      .product-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 540px) {
+      .product-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <script src="navbar.js"></script>
+
+  <!-- Hero -->
+  <div class="shop-hero">
+    <div class="container">
+      <div class="hero-tagline">Browse</div>
+      <h1>Shop All Products</h1>
+      <p>Explore fresh produce from all five of our local traders</p>
+    </div>
+  </div>
+
+  <!-- Sticky search bar -->
+  <div class="search-bar-wrap">
+    <div class="container">
+      <div class="search-bar">
+        <div class="search-input-wrap">
+          <span class="search-icon">🔍</span>
+          <input class="search-input" type="text" placeholder="Search products across all traders…" />
+        </div>
+        <button class="btn btn-primary">Search</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Trader tabs -->
+  <div class="trader-tabs-bar">
+    <div class="container">
+      <div class="trader-tabs-inner">
+        <button class="trader-tab active" onclick="setTrader(this)">🛒 All Traders</button>
+        <button class="trader-tab" onclick="setTrader(this)">🥩 The Butcher</button>
+        <button class="trader-tab" onclick="setTrader(this)">🥦 Greengrocer</button>
+        <button class="trader-tab" onclick="setTrader(this)">🐟 Fishmonger</button>
+        <button class="trader-tab" onclick="setTrader(this)">🍞 The Bakery</button>
+        <button class="trader-tab" onclick="setTrader(this)">🧀 Delicatessen</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main layout -->
+  <div class="container">
+    <div class="shop-layout">
+
+      <!-- Sidebar filters -->
+      <aside class="shop-sidebar">
+        <div class="filter-panel">
+          <h5>Allergy Filter</h5>
+          <div class="filter-option"><input type="checkbox" id="f-gluten" /><label for="f-gluten">Gluten-free</label></div>
+          <div class="filter-option"><input type="checkbox" id="f-dairy" /><label for="f-dairy">Dairy-free</label></div>
+          <div class="filter-option"><input type="checkbox" id="f-nut" /><label for="f-nut">Nut-free</label></div>
+          <div class="filter-option"><input type="checkbox" id="f-shell" /><label for="f-shell">Shellfish-free</label></div>
+        </div>
+
+        <div class="filter-panel">
+          <h5>Price Range</h5>
+          <input type="range" min="0" max="50" value="25" id="price-range" oninput="document.getElementById('price-val').textContent='£0 – £'+this.value" />
+          <div class="price-range-display">
+            <span id="price-val">£0 – £25</span>
+            <span>£50</span>
+          </div>
+        </div>
+
+        <div class="filter-panel">
+          <h5>Availability</h5>
+          <div class="filter-option"><input type="radio" name="avail" id="a-in" checked /><label for="a-in">In stock only</label></div>
+          <div class="filter-option"><input type="radio" name="avail" id="a-all" /><label for="a-all">Show all (incl. out of stock)</label></div>
+        </div>
+
+        <div class="filter-panel">
+          <h5>Freshness</h5>
+          <div class="filter-option"><input type="checkbox" id="fv-fresh" /><label for="fv-fresh">Very Fresh</label></div>
+          <div class="filter-option"><input type="checkbox" id="fv-ok" checked /><label for="fv-ok">Fresh</label></div>
+          <div class="filter-option"><input type="checkbox" id="fv-soon" /><label for="fv-soon">Use Soon</label></div>
+        </div>
+
+        <button class="btn btn-ghost btn-full btn-sm" onclick="clearFilters()">Clear All Filters</button>
+      </aside>
+
+      <!-- Products -->
+      <div>
+        <div class="products-header">
+          <p>Showing <strong>18</strong> products · Page 1 of 3</p>
+          <select class="sort-select">
+            <option>Sort: Relevance</option>
+            <option>Price: Low to High</option>
+            <option>Price: High to Low</option>
+            <option>Freshness</option>
+            <option>Rating</option>
+          </select>
+        </div>
+
+        <div class="product-grid" id="productGrid">
+
+          <!-- Product 1 -->
+          <div class="product-card">
+            <a href="product.html" style="text-decoration:none; color:inherit;">
+            <div class="product-card-img">🥩</div>
+            <div class="product-card-body">
+              <div class="product-card-cat">Butcher</div>
+              <div class="product-card-trader">The Butcher</div>
+              <div class="product-card-name">Ribeye Steak (250g)</div>
+              <div class="product-price"><span class="price">£9.00</span><span class="price-orig">£12.00</span></div>
+              <div class="freshness-bar"><div class="freshness-fill" style="width:90%"></div></div>
+            </div>
+            </a>
+            <div class="product-card-footer">
+              <span class="badge badge-green">In Stock</span>
+              <a href="checkout.html" class="btn btn-primary btn-sm">Add</a>
+            </div>
+          </div>
+
+          <!-- Product 2 -->
+          <div class="product-card">
+            <a href="product.html" style="text-decoration:none; color:inherit;">
+            <div class="product-card-img">🐔</div>
+            <div class="product-card-body">
+              <div class="product-card-cat">Butcher</div>
+              <div class="product-card-trader">The Butcher</div>
+              <div class="product-card-name">Free Range Chicken Breast</div>
+              <div class="product-price"><span class="price">£6.50</span></div>
+              <div class="freshness-bar"><div class="freshness-fill" style="width:85%"></div></div>
+            </div>
+            </a>
+            <div class="product-card-footer">
+              <span class="badge badge-green">In Stock</span>
+              <button class="btn btn-primary btn-sm" onclick="addToCart(this)">Add</button>
+            </div>
+          </div>
+
+          <!-- Product 3 -->
+          <div class="product-card">
+            <a href="product.html" style="text-decoration:none; color:inherit;">
+            <div class="product-card-img">🥦</div>
+            <div class="product-card-body">
+              <div class="product-card-cat">Vegetable</div>
+              <div class="product-card-trader">Greengrocer</div>
+              <div class="product-card-name">Tenderstem Broccoli (300g)</div>
+              <div class="product-price"><span class="price">£2.40</span></div>
+              <div class="freshness-bar"><div class="freshness-fill" style="width:95%"></div></div>
+            </div>
+            </a>
+            <div class="product-card-footer">
+              <span class="badge badge-green">In Stock</span>
+              <button class="btn btn-primary btn-sm" onclick="addToCart(this)">Add</button>
+            </div>
+          </div>
+
+          <!-- Product 4 -->
+          <div class="product-card">
+            <a href="product.html" style="text-decoration:none; color:inherit;">
+            <div class="product-card-img">🥕</div>
+            <div class="product-card-body">
+              <div class="product-card-cat">Vegetable</div>
+              <div class="product-card-trader">Greengrocer</div>
+              <div class="product-card-name">Heritage Carrots (1kg)</div>
+              <div class="product-price"><span class="price">£2.20</span></div>
+              <div class="freshness-bar"><div class="freshness-fill" style="width:80%"></div></div>
+            </div>
+            </a>
+            <div class="product-card-footer">
+              <span class="badge badge-green">In Stock</span>
+              <button class="btn btn-primary btn-sm" onclick="addToCart(this)">Add</button>
+            </div>
+          </div>
+
+          <!-- Product 5 -->
+          <div class="product-card">
+            <a href="product.html" style="text-decoration:none; color:inherit;">
+            <div class="product-card-img">🐟</div>
+            <div class="product-card-body">
+              <div class="product-card-cat">Fish</div>
+              <div class="product-card-trader">Fishmonger</div>
+              <div class="product-card-name">Atlantic Salmon Fillet (200g)</div>
+              <div class="product-price"><span class="price">£7.50</span></div>
+              <div class="freshness-bar"><div class="freshness-fill" style="width:90%"></div></div>
+            </div>
+            </a>
+            <div class="product-card-footer">
+              <span class="badge badge-green">In Stock</span>
+              <button class="btn btn-primary btn-sm" onclick="addToCart(this)">Add</button>
+            </div>
+          </div>
+
+          <!-- Product 6 – out of stock -->
+          <div class="product-card" style="opacity:.7;">
+            <a href="product.html" style="text-decoration:none; color:inherit;">
+            <div class="product-card-img">🦐</div>
+            <div class="product-card-body">
+              <div class="product-card-cat">Seafood</div>
+              <div class="product-card-trader">Fishmonger</div>
+              <div class="product-card-name">King Prawns (300g)</div>
+              <div class="product-price"><span class="price">£8.00</span></div>
+              <div class="freshness-bar"><div class="freshness-fill" style="width:0%"></div></div>
+            </div>
+            </a>
+            <div class="product-card-footer">
+              <span class="badge badge-muted">Out of Stock</span>
+              <button class="btn btn-ghost btn-sm" disabled style="opacity:.5; cursor:not-allowed;">Out of stock</button>
+            </div>
+          </div>
+
+          <!-- Product 7 -->
+          <div class="product-card">
+            <a href="product.html" style="text-decoration:none; color:inherit;">
+            <div class="product-card-img">🍞</div>
+            <div class="product-card-body">
+              <div class="product-card-cat">Bread</div>
+              <div class="product-card-trader">The Bakery</div>
+              <div class="product-card-name">Sourdough Loaf (800g)</div>
+              <div class="product-price"><span class="price">£3.20</span><span class="price-orig">£4.00</span></div>
+              <div class="freshness-bar"><div class="freshness-fill" style="width:100%"></div></div>
+            </div>
+            </a>
+            <div class="product-card-footer">
+              <span class="badge badge-green">In Stock</span>
+              <button class="btn btn-primary btn-sm" onclick="addToCart(this)">Add</button>
+            </div>
+          </div>
+
+          <!-- Product 8 -->
+          <div class="product-card">
+            <a href="product.html" style="text-decoration:none; color:inherit;">
+            <div class="product-card-img">🥐</div>
+            <div class="product-card-body">
+              <div class="product-card-cat">Pastry</div>
+              <div class="product-card-trader">The Bakery</div>
+              <div class="product-card-name">Almond Croissant (2-pack)</div>
+              <div class="product-price"><span class="price">£3.80</span></div>
+              <div class="freshness-bar"><div class="freshness-fill" style="width:100%"></div></div>
+            </div>
+            </a>
+            <div class="product-card-footer">
+              <span class="badge badge-gold">Low Stock</span>
+              <button class="btn btn-primary btn-sm" onclick="addToCart(this)">Add</button>
+            </div>
+          </div>
+
+          <!-- Product 9 -->
+          <div class="product-card">
+            <a href="product.html" style="text-decoration:none; color:inherit;">
+            <div class="product-card-img">🧀</div>
+            <div class="product-card-body">
+              <div class="product-card-cat">Cheese</div>
+              <div class="product-card-trader">Delicatessen</div>
+              <div class="product-card-name">Aged Manchego (200g)</div>
+              <div class="product-price"><span class="price">£5.10</span><span class="price-orig">£6.00</span></div>
+              <div class="freshness-bar"><div class="freshness-fill" style="width:70%"></div></div>
+            </div>
+            </a>
+            <div class="product-card-footer">
+              <span class="badge badge-gold">Low Stock</span>
+              <button class="btn btn-primary btn-sm" onclick="addToCart(this)">Add</button>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination">
+          <button class="page-btn active">1</button>
+          <button class="page-btn">2</button>
+          <button class="page-btn">3</button>
+          <button class="page-btn">›</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-top">
+      <div class="container">
+        <div class="footer-grid">
+          <div class="footer-col">
+            <div class="footer-brand">StreetDoko</div>
+            <p class="footer-tagline">A click-and-collect marketplace for fresh, local produce.</p>
+          </div>
+          <div class="footer-col">
+            <h5>Quick Links</h5>
+            <ul>
+              <li><a href="homepage.html">Home</a></li>
+              <li><a href="browse.html">Shop</a></li>
+              <li><a href="about.html">About Us</a></li>
+              <li><a href="profile.html">My Account</a></li>
+            </ul>
+          </div>
+          <div class="footer-col">
+            <h5>Our Traders</h5>
+            <ul>
+              <li><a href="#">The Butcher</a></li>
+              <li><a href="#">Greengrocer</a></li>
+              <li><a href="#">Fishmonger</a></li>
+              <li><a href="#">The Bakery</a></li>
+              <li><a href="#">Delicatessen</a></li>
+            </ul>
+          </div>
+          <div class="footer-col">
+            <h5>Contact</h5>
+            <p>📧 hello@streetdoko.com</p>
+            <p>📞 01423 000 000</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="container" style="width:100%; display:flex; justify-content:space-between; align-items:center;">
+        <span>© 2026 StreetDoko. All rights reserved.</span>
+        <span><a href="#" style="color:#555; font-size:12px;">Privacy Policy</a></span>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    let cartCount = 2;
+
+    function setTrader(el) {
+      document.querySelectorAll('.trader-tab').forEach(t => t.classList.remove('active'));
+      el.classList.add('active');
+    }
+
+    function addToCart(btn) {
+      btn.textContent = 'Added ✓';
+      btn.classList.remove('btn-primary');
+      btn.classList.add('btn-ghost');
+      cartCount++;
+      const badge = document.querySelector('.cart-badge');
+      if (badge) badge.textContent = cartCount;
+      setTimeout(() => { window.location.href = 'checkout.html'; }, 600);
+    }
+
+    function clearFilters() {
+      document.querySelectorAll('.filter-option input').forEach(i => {
+        if (i.type === 'checkbox') i.checked = false;
+      });
+    }
+
+    // Auto-select trader tab from URL param e.g. browse.html?trader=butcher
+    (function () {
+      const params = new URLSearchParams(window.location.search);
+      const trader = params.get('trader');
+      if (!trader) return;
+      const map = {
+        butcher:     '🥩 The Butcher',
+        greengrocer: '🥦 Greengrocer',
+        fishmonger:  '🐟 Fishmonger',
+        bakery:      '🍞 The Bakery',
+        deli:        '🧀 Delicatessen',
+      };
+      const label = map[trader];
+      if (!label) return;
+      document.querySelectorAll('.trader-tab').forEach(tab => {
+        if (tab.textContent.trim() === label) {
+          document.querySelectorAll('.trader-tab').forEach(t => t.classList.remove('active'));
+          tab.classList.add('active');
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

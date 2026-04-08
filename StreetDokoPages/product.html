@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Grass-fed Ribeye Steak — StreetDoko</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .breadcrumb {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 13px; color: var(--ink-muted); padding: 18px 0 0;
+    }
+    .breadcrumb a { color: var(--ink-muted); transition: var(--ease); }
+    .breadcrumb a:hover { color: var(--green); }
+    .breadcrumb .sep { color: var(--border); }
+
+    /* Product layout */
+    .product-layout {
+      display: grid;
+      grid-template-columns: 1fr 420px;
+      gap: 48px;
+      padding-block: 36px;
+      align-items: start;
+    }
+
+    /* Images */
+    .product-main-img {
+      background: var(--cream-dark);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      height: 400px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 7rem; margin-bottom: 16px;
+      position: relative; overflow: hidden;
+    }
+    .product-badge-large {
+      position: absolute; top: 16px; left: 16px;
+      background: var(--red); color: #fff;
+      font-size: 13px; font-weight: 700;
+      padding: 5px 12px; border-radius: 999px;
+    }
+    .thumb-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .thumb {
+      height: 100px; background: var(--cream-dark); border-radius: var(--radius);
+      border: 2px solid transparent; display: flex; align-items: center; justify-content: center;
+      font-size: 2rem; cursor: pointer; transition: var(--ease);
+    }
+    .thumb:hover, .thumb.active { border-color: var(--green); }
+
+    /* Info panel */
+    .product-info { position: sticky; top: calc(var(--nav-h) + 16px); }
+    .trader-tag {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--green-pale); color: var(--green);
+      padding: 5px 12px; border-radius: 999px; font-size: 12px; font-weight: 700;
+      margin-bottom: 10px;
+    }
+    .product-title { font-size: 2rem; margin-bottom: 4px; }
+    .product-sku { font-size: 12px; color: var(--ink-muted); margin-bottom: 16px; }
+    .product-price-big { font-family: 'Playfair Display', serif; font-size: 2.2rem; font-weight: 700; color: var(--green); margin-bottom: 4px; }
+    .product-price-orig { font-size: 14px; color: var(--ink-muted); text-decoration: line-through; }
+
+    /* Spec pills */
+    .spec-pills { display: flex; gap: 8px; flex-wrap: wrap; margin: 16px 0; }
+    .spec-pill {
+      padding: 6px 14px; border-radius: 999px; font-size: 12px; font-weight: 600;
+      background: var(--cream-dark); color: var(--ink); border: 1px solid var(--border);
+    }
+
+    /* Allergy */
+    .allergy-row {
+      display: flex; align-items: center; gap: 10px;
+      background: var(--gold-pale); border: 1px solid var(--gold);
+      border-radius: var(--radius); padding: 10px 14px; font-size: 13px; color: var(--gold);
+      margin-bottom: 16px;
+    }
+
+    /* Stock */
+    .stock-row { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
+    .stock-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--green); flex-shrink: 0; }
+
+    /* Quantity stepper */
+    .qty-block { margin-bottom: 20px; }
+    .qty-block .qty-label { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .4px; color: var(--ink-muted); margin-bottom: 8px; }
+    .qty-range { font-size: 12px; color: var(--ink-muted); margin-bottom: 8px; }
+    .qty-stepper { display: flex; align-items: center; gap: 0; border: 1.5px solid var(--border); border-radius: var(--radius); overflow: hidden; width: fit-content; }
+    .qty-btn {
+      width: 42px; height: 42px; background: var(--cream); border: none;
+      font-size: 20px; font-weight: 300; color: var(--ink); cursor: pointer; transition: var(--ease);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .qty-btn:hover { background: var(--cream-dark); }
+    .qty-input {
+      width: 64px; height: 42px; border: none; border-left: 1.5px solid var(--border); border-right: 1.5px solid var(--border);
+      text-align: center; font-size: 16px; font-weight: 600; background: var(--white); outline: none; color: var(--ink);
+    }
+
+    /* Add to basket */
+    .add-basket-btn {
+      width: 100%; padding: 16px; font-size: 16px; font-weight: 700;
+      background: var(--green); color: #fff; border: none; border-radius: var(--radius-lg);
+      cursor: pointer; transition: var(--ease); margin-bottom: 12px;
+    }
+    .add-basket-btn:hover { background: var(--green-mid); transform: translateY(-1px); box-shadow: var(--shadow-md); }
+
+    /* Collection info */
+    .collect-info { background: var(--cream-dark); border-radius: var(--radius); padding: 16px; font-size: 13px; }
+    .collect-info h5 { font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .4px; color: var(--ink-muted); margin-bottom: 10px; }
+    .collect-info-row { display: flex; align-items: center; gap: 8px; color: var(--ink-soft); margin-bottom: 6px; }
+
+    /* Description */
+    .product-description { background: var(--white); }
+
+    /* More from trader */
+    .more-trader { background: var(--cream); }
+
+    @media (max-width: 900px) {
+      .product-layout { grid-template-columns: 1fr; }
+      .product-info { position: static; }
+    }
+  </style>
+</head>
+<body>
+  <script src="navbar.js"></script>
+
+  <div class="container">
+    <!-- Breadcrumb -->
+    <div class="breadcrumb">
+      <a href="homepage.html">Home</a>
+      <span class="sep">›</span>
+      <a href="browse.html">The Butcher</a>
+      <span class="sep">›</span>
+      <span>Grass-fed Ribeye Steak</span>
+    </div>
+
+    <!-- Product layout -->
+    <div class="product-layout">
+
+      <!-- Left: images -->
+      <div>
+        <div class="product-main-img">
+          🥩
+          <span class="product-badge-large">25% OFF</span>
+        </div>
+        <div class="thumb-row">
+          <div class="thumb active">🥩</div>
+          <div class="thumb">🔪</div>
+          <div class="thumb">🏷️</div>
+        </div>
+
+        <!-- Description -->
+        <div style="margin-top: 40px;">
+          <h3 style="margin-bottom: 14px;">Product Description</h3>
+          <p style="font-size:14px; line-height:1.8; color:var(--ink-soft);">
+            Our grass-fed ribeye is sourced from local farms where cattle graze freely on natural pastures. 
+            The generous marbling through this cut delivers exceptional flavour and tenderness whether you pan-fry, 
+            grill, or reverse-sear to your preferred doneness.
+          </p>
+          <p style="font-size:14px; line-height:1.8; color:var(--ink-soft); margin-top:12px;">
+            Each steak is hand-cut by our master butcher to approximately 250g and dry-aged for a minimum of 21 days 
+            to develop deep, complex flavour. Best served medium-rare with a resting period of at least 5 minutes.
+          </p>
+          <p style="font-size:14px; line-height:1.8; color:var(--ink-soft); margin-top:12px;">
+            <strong>Storage:</strong> Keep refrigerated at 0–4°C. Consume within 2 days of collection or freeze on day of collection.
+          </p>
+        </div>
+
+        <!-- Collection info block -->
+        <div style="margin-top: 32px;">
+          <h3 style="margin-bottom: 14px;">Click &amp; Collect Information</h3>
+          <div class="collect-info">
+            <h5>Collection Rules</h5>
+            <div class="collect-info-row"><span>📅</span> Available for collection: Wednesday, Thursday, Friday</div>
+            <div class="collect-info-row"><span>⏰</span> Slots run 09:00 – 13:00 in 30-minute windows</div>
+            <div class="collect-info-row"><span>🕐</span> Orders must be placed at least 24 hours in advance</div>
+            <div class="collect-info-row"><span>📦</span> Maximum 20 orders per time slot</div>
+            <div class="collect-info-row"><span>📍</span> Collection point: Market Hall, Town Centre</div>
+          </div>
+        </div>
+
+        <!-- Reviews -->
+        <div style="margin-top: 40px;">
+          <h3 style="margin-bottom: 20px;">Customer Reviews</h3>
+          <div style="display:flex; flex-direction:column; gap:16px;">
+            <div class="review-card">
+              <div class="review-card-header">
+                <div class="review-avatar">S</div>
+                <div>
+                  <div class="fw-600" style="font-size:14px;">Sarah M.</div>
+                  <div class="text-xs text-muted">Harrogate</div>
+                  <div class="stars">★★★★★</div>
+                </div>
+              </div>
+              <p style="font-size:13px; color:var(--ink-soft);">"Absolutely incredible — best steak I've cooked at home. The dry-aged flavour is something else entirely. Will be ordering every week."</p>
+            </div>
+            <div class="review-card">
+              <div class="review-card-header">
+                <div class="review-avatar">M</div>
+                <div>
+                  <div class="fw-600" style="font-size:14px;">Marcus T.</div>
+                  <div class="text-xs text-muted">Knaresborough</div>
+                  <div class="stars">★★★★☆</div>
+                </div>
+              </div>
+              <p style="font-size:13px; color:var(--ink-soft);">"Great quality and well packaged. Would be nice to have slightly larger cuts available — the 250g went quickly between two of us!"</p>
+            </div>
+            <div class="review-card">
+              <div class="review-card-header">
+                <div class="review-avatar">R</div>
+                <div>
+                  <div class="fw-600" style="font-size:14px;">Rachel B.</div>
+                  <div class="text-xs text-muted">Ripon</div>
+                  <div class="stars">★★★★★</div>
+                </div>
+              </div>
+              <p style="font-size:13px; color:var(--ink-soft);">"You genuinely cannot get this quality in a supermarket. Supporting local and eating brilliantly — can't ask for more."</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: info panel -->
+      <div class="product-info">
+        <div class="trader-tag">🥩 The Butcher</div>
+        <h1 class="product-title">Grass-fed Ribeye Steak</h1>
+        <div class="product-sku">SKU: BUT-RIB-001 · Hand-cut, dry-aged 21 days</div>
+
+        <div class="product-price-big">£9.00 <span style="font-size:1rem; font-weight:400; color:var(--ink-muted);">/ steak</span></div>
+        <div class="product-price-orig">Was £12.00 &nbsp;<span class="badge badge-red">25% OFF</span></div>
+
+        <!-- Specs -->
+        <div class="spec-pills">
+          <span class="spec-pill">⚖️ 250g</span>
+          <span class="spec-pill">📏 ~2cm thick</span>
+          <span class="spec-pill">🌿 Very Fresh</span>
+          <span class="spec-pill">🐄 Grass-fed</span>
+        </div>
+
+        <!-- Allergy -->
+        <div class="allergy-row">
+          <span>⚠️</span>
+          <span><strong>Allergens:</strong> None declared. May contain traces of other meats.</span>
+        </div>
+
+        <!-- Stock -->
+        <div class="stock-row">
+          <div class="stock-dot"></div>
+          <span style="font-size:13px; font-weight:600; color:var(--green);">In Stock</span>
+          <span style="font-size:13px; color:var(--ink-muted);">— 14 remaining</span>
+        </div>
+
+        <!-- Qty selector -->
+        <div class="qty-block">
+          <div class="qty-label">Quantity</div>
+          <div class="qty-range">Min: 1 &nbsp;|&nbsp; Max: 6 per order</div>
+          <div class="qty-stepper">
+            <button class="qty-btn" onclick="changeQty(-1)">−</button>
+            <input class="qty-input" type="number" id="qty" value="1" min="1" max="6" readonly />
+            <button class="qty-btn" onclick="changeQty(1)">+</button>
+          </div>
+        </div>
+
+        <!-- Add to basket -->
+        <button class="add-basket-btn" id="addBtn" onclick="addToBasket()">
+          Add to Basket — £9.00
+        </button>
+
+        <a href="checkout.html" class="btn btn-ghost btn-full" style="margin-bottom:16px;">View Basket</a>
+
+        <!-- Collect info -->
+        <div class="collect-info">
+          <h5>Click &amp; Collect</h5>
+          <div class="collect-info-row"><span>📅</span> Wed – Fri, 09:00 – 13:00</div>
+          <div class="collect-info-row"><span>⏰</span> Book 24 hrs in advance</div>
+          <div class="collect-info-row"><span>📍</span> Market Hall, Town Centre</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- More from trader -->
+  <section class="section more-trader">
+    <div class="container">
+      <div class="section-header">
+        <h2>More from The Butcher</h2>
+        <a href="browse.html" class="section-link">View all →</a>
+      </div>
+      <div class="grid-4">
+        <div class="product-card card-hover">
+          <div class="product-card-img">🐔</div>
+          <div class="product-card-body">
+            <div class="product-card-cat">Butcher</div>
+            <div class="product-card-name">Free Range Chicken Breast</div>
+            <div class="product-price"><span class="price">£6.50</span></div>
+          </div>
+          <div class="product-card-footer">
+            <span class="badge badge-green">In Stock</span>
+            <button class="btn btn-primary btn-sm">Add</button>
+          </div>
+        </div>
+        <div class="product-card card-hover">
+          <div class="product-card-img">🍖</div>
+          <div class="product-card-body">
+            <div class="product-card-cat">Butcher</div>
+            <div class="product-card-name">Lamb Shoulder (1kg)</div>
+            <div class="product-price"><span class="price">£14.00</span></div>
+          </div>
+          <div class="product-card-footer">
+            <span class="badge badge-green">In Stock</span>
+            <button class="btn btn-primary btn-sm">Add</button>
+          </div>
+        </div>
+        <div class="product-card card-hover">
+          <div class="product-card-img">🥩</div>
+          <div class="product-card-body">
+            <div class="product-card-cat">Butcher</div>
+            <div class="product-card-name">Pork Belly (500g)</div>
+            <div class="product-price"><span class="price">£7.20</span></div>
+          </div>
+          <div class="product-card-footer">
+            <span class="badge badge-gold">Low Stock</span>
+            <button class="btn btn-primary btn-sm">Add</button>
+          </div>
+        </div>
+        <div class="product-card card-hover">
+          <div class="product-card-img">🍗</div>
+          <div class="product-card-body">
+            <div class="product-card-cat">Butcher</div>
+            <div class="product-card-name">Duck Legs (2-pack)</div>
+            <div class="product-price"><span class="price">£9.80</span></div>
+          </div>
+          <div class="product-card-footer">
+            <span class="badge badge-green">In Stock</span>
+            <button class="btn btn-primary btn-sm">Add</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-top">
+      <div class="container">
+        <div class="footer-grid">
+          <div class="footer-col">
+            <div class="footer-brand">StreetDoko</div>
+            <p class="footer-tagline">A click-and-collect marketplace for fresh, local produce.</p>
+          </div>
+          <div class="footer-col">
+            <h5>Quick Links</h5>
+            <ul>
+              <li><a href="homepage.html">Home</a></li>
+              <li><a href="browse.html">Shop</a></li>
+              <li><a href="about.html">About Us</a></li>
+              <li><a href="profile.html">My Account</a></li>
+            </ul>
+          </div>
+          <div class="footer-col">
+            <h5>Our Traders</h5>
+            <ul>
+              <li><a href="browse.html">The Butcher</a></li>
+              <li><a href="browse.html">Greengrocer</a></li>
+              <li><a href="browse.html">Fishmonger</a></li>
+              <li><a href="browse.html">The Bakery</a></li>
+              <li><a href="browse.html">Delicatessen</a></li>
+            </ul>
+          </div>
+          <div class="footer-col">
+            <h5>Contact</h5>
+            <p>📧 hello@streetdoko.com</p>
+            <p>📞 01423 000 000</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="container" style="width:100%; display:flex; justify-content:space-between; align-items:center;">
+        <span>© 2026 StreetDoko. All rights reserved.</span>
+        <span><a href="#" style="color:#555; font-size:12px;">Privacy Policy</a></span>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    let qty = 1;
+    const prices = { unit: 9.00 };
+
+    function changeQty(delta) {
+      qty = Math.min(6, Math.max(1, qty + delta));
+      document.getElementById('qty').value = qty;
+      document.getElementById('addBtn').textContent = `Add to Basket — £${(qty * prices.unit).toFixed(2)}`;
+    }
+
+    function addToBasket() {
+      const btn = document.getElementById('addBtn');
+      btn.textContent = '✓ Added to Basket!';
+      btn.style.background = 'var(--green-mid)';
+      const badge = document.querySelector('.cart-badge');
+      if (badge) badge.textContent = parseInt(badge.textContent || 0) + qty;
+      setTimeout(() => {
+        btn.textContent = `Add to Basket — £${(qty * prices.unit).toFixed(2)}`;
+        btn.style.background = '';
+      }, 2000);
+    }
+  </script>
+</body>
+</html>
