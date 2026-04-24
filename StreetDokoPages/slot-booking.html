@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Book a Collection Slot — StreetDoko</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <script src="api.js"></script>
+  <script src="navbar.js"></script>
+
+  <div class="slot-hero">
+    <div class="container">
+      <h1>Select a Collection Slot</h1>
+      <p>Choose an available date and time to collect your order from the Market Hall.</p>
+      <div class="info-chips">
+        <div class="info-chip">Wed – Fri only</div>
+        <div class="info-chip">Book at least 24 hrs ahead</div>
+        <div class="info-chip">Max 20 orders per slot</div>
+        <div class="info-chip">Market Hall, Town Centre</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="slot-layout">
+
+      <div>
+        <div class="calendar-card">
+          <div class="calendar-header">
+            <button class="cal-nav-btn" onclick="changeMonth(-1)">‹</button>
+            <h3 id="cal-title">April 2026</h3>
+            <button class="cal-nav-btn" onclick="changeMonth(1)">›</button>
+          </div>
+          <div class="cal-weekdays">
+            <div class="cal-weekday">Mon</div><div class="cal-weekday">Tue</div>
+            <div class="cal-weekday">Wed</div><div class="cal-weekday">Thu</div>
+            <div class="cal-weekday">Fri</div><div class="cal-weekday">Sat</div>
+            <div class="cal-weekday">Sun</div>
+          </div>
+          <div class="cal-grid" id="calGrid"></div>
+          <div class="cal-legend">
+            <div class="legend-item"><div class="legend-dot dot-available"></div> Available</div>
+            <div class="legend-item"><div class="legend-dot dot-full"></div> Full</div>
+            <div class="legend-item"><div class="legend-dot dot-collected"></div> Collected</div>
+            <div class="legend-item"><div class="legend-dot dot-unavailable"></div> Unavailable</div>
+          </div>
+        </div>
+
+        <div class="time-slots-card" id="timeSlotsPanel" style="display:none;">
+          <div class="time-slots-header">
+            <h4>Available Times — <span id="selectedDateLabel"></span></h4>
+          </div>
+          <div class="time-slots-body" id="timeSlotsBody">
+            <div class="api-loading">Loading slots…</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="summary-sidebar">
+        <div class="summary-card-slot">
+          <div class="summary-card-slot-header"><h3>Your Order</h3></div>
+          <div class="summary-card-slot-body">
+            <div class="slot-selected-display empty-slot" id="slotDisplay">
+              <div class="slot-date">No slot selected yet</div>
+              <div class="slot-time-disp">Select a date and time above</div>
+            </div>
+            <div id="cart-items-display">
+              <div class="api-loading">Loading cart…</div>
+            </div>
+            <div style="height:1px; background:var(--border); margin:14px 0;"></div>
+            <div style="display:flex; justify-content:space-between; font-size:16px; font-weight:700; margin-bottom:16px;">
+              <span>Total</span><span id="cart-total">£0.00</span>
+            </div>
+            <button class="paypal-btn" style="margin-top:16px; margin-bottom:0; padding:12px;" onclick="alert('PayPal…')">Pay with PayPal</button>
+            <button class="confirm-btn" id="confirmBtn" disabled onclick="confirmSlot()">Confirm Slot &amp; Place Order</button>
+            <p class="security-note mt-8">Secure checkout · Confirmation email sent on order</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-top">
+      <div class="container">
+        <div class="footer-grid">
+          <div class="footer-col"><div class="footer-brand">StreetDoko</div><p class="footer-tagline">A click-and-collect marketplace for fresh, local produce.</p></div>
+          <div class="footer-col"><h5>Quick Links</h5><ul><li><a href="homepage.html">Home</a></li><li><a href="browse.html">Shop</a></li><li><a href="about.html">About Us</a></li></ul></div>
+          <div class="footer-col"><h5>Contact</h5><p>hello@streetdoko.com</p><p>01423 000 000</p></div>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom"><div class="container footer-bottom-row"><span>© 2026 StreetDoko. All rights reserved.</span><a href="#" style="color:#555;font-size:12px;">Privacy Policy</a></div></div>
+  </footer>
+
+  <script>
+    let currentYear = 2026, currentMonth = 3;
+    let selectedDate = null, selectedSlot = null;
+    let apiSlotData = []; // loaded from API
+
+    const COLLECT_DAYS = [3, 4, 5]; // Wed=3, Thu=4, Fri=5 (Monday-based)
+    const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+    function pad(n) { return String(n).padStart(2,'0'); }
+    function dateKey(y,m,d) { return `${y}-${pad(m+1)}-${pad(d)}`; }
+    function todayKey() { const t = new Date(); return dateKey(t.getFullYear(), t.getMonth(), t.getDate()); }
+
+    function getDayStatus(y, m, d) {
+      const key = dateKey(y, m, d);
+      const jsDay = new Date(y, m, d).getDay();
+      const monBased = jsDay === 0 ? 7 : jsDay;
+      if (key < todayKey()) return 'past';
+      if (!COLLECT_DAYS.includes(monBased)) return 'unavailable';
+      // Check API data
+      const apiDay = apiSlotData.find(s => s.date === key);
+      if (apiDay) {
+        const allFull = apiDay.times.every(t => t.orders >= t.cap);
+        if (allFull) return 'full';
+      }
+      return 'available';
+    }
+
+    function buildCalendar() {
+      document.getElementById('cal-title').textContent = `${MONTHS[currentMonth]} ${currentYear}`;
+      const grid = document.getElementById('calGrid');
+      grid.innerHTML = '';
+      const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+      const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+      const offset = firstDay === 0 ? 6 : firstDay - 1;
+      for (let i = 0; i < offset; i++) {
+        const e = document.createElement('div'); e.className = 'cal-day empty'; grid.appendChild(e);
+      }
+      const today = todayKey();
+      for (let d = 1; d <= daysInMonth; d++) {
+        const key = dateKey(currentYear, currentMonth, d);
+        const status = getDayStatus(currentYear, currentMonth, d);
+        const el = document.createElement('div');
+        el.textContent = d; el.className = 'cal-day';
+        if (key === today) el.classList.add('today');
+        if (key === selectedDate) el.classList.add('selected');
+        if (status === 'past' || status === 'unavailable') el.classList.add(status === 'past' ? 'disabled' : 'unavailable');
+        else if (status === 'full') el.classList.add('full');
+        else { el.classList.add('available'); el.onclick = () => selectDate(key, d); }
+        grid.appendChild(el);
+      }
+    }
+
+    async function loadSlotsForMonth() {
+      try {
+        const data = await API.getSlots(currentYear, currentMonth + 1);
+        apiSlotData = data.items || [];
+        buildCalendar();
+      } catch {
+        buildCalendar(); // Render with defaults on error
+      }
+    }
+
+    function selectDate(key, d) {
+      selectedDate = key; selectedSlot = null;
+      buildCalendar();
+      showTimeSlots(key, d);
+    }
+
+    function showTimeSlots(key, d) {
+      const panel = document.getElementById('timeSlotsPanel');
+      const label = document.getElementById('selectedDateLabel');
+      const body  = document.getElementById('timeSlotsBody');
+      const dayNames = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+      label.textContent = `${dayNames[new Date(currentYear, currentMonth, d).getDay()]} ${d} ${MONTHS[currentMonth]}`;
+      panel.style.display = 'block';
+
+      // Find slot data from API response or use defaults
+      const apiDay = apiSlotData.find(s => s.date === key);
+      const times = apiDay?.times || [
+        { time: '09:00 – 09:30', orders: 0, cap: 20 },
+        { time: '09:30 – 10:00', orders: 0, cap: 20 },
+        { time: '10:00 – 10:30', orders: 0, cap: 20 },
+        { time: '10:30 – 11:00', orders: 0, cap: 20 },
+        { time: '11:00 – 11:30', orders: 0, cap: 20 },
+        { time: '11:30 – 12:00', orders: 0, cap: 20 },
+        { time: '12:00 – 12:30', orders: 0, cap: 20 },
+        { time: '12:30 – 13:00', orders: 0, cap: 20 },
+      ];
+
+      body.innerHTML = '';
+      times.forEach((s, i) => {
+        const isFull = s.orders >= s.cap;
+        const fillPct = Math.round((s.orders / s.cap) * 100);
+        const fillClass = isFull ? 'full' : (fillPct >= 70 ? 'warn' : '');
+        const el = document.createElement('div');
+        el.className = 'slot-item' + (isFull ? ' slot-full' : '');
+        el.innerHTML = `
+          <div>
+            <div class="slot-time">${s.time}</div>
+            <div class="slot-count">${s.orders} / ${s.cap} orders</div>
+            <div class="slot-bar"><div class="slot-bar-fill ${fillClass}" style="width:${fillPct}%"></div></div>
+          </div>
+          <span class="slot-status ${isFull ? 's-full' : 's-available'}">${isFull ? 'Full' : 'Available'}</span>`;
+        if (!isFull) el.onclick = () => selectSlot(i, s.time, d, key);
+        body.appendChild(el);
+      });
+      panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function selectSlot(idx, timeStr, d, dateKey) {
+      selectedSlot = { idx, timeStr, date: dateKey, d };
+      document.querySelectorAll('.slot-item').forEach((el, i) => {
+        el.classList.toggle('slot-selected', i === idx);
+        const badge = el.querySelector('.slot-status');
+        if (i === idx) { badge.className = 'slot-status s-selected'; badge.textContent = 'Selected'; }
+        else if (!el.classList.contains('slot-full')) { badge.className = 'slot-status s-available'; badge.textContent = 'Available'; }
+      });
+      const dayNames = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+      document.getElementById('slotDisplay').className = 'slot-selected-display';
+      document.getElementById('slotDisplay').innerHTML = `
+        <div class="slot-date">${dayNames[new Date(currentYear, currentMonth, d).getDay()]} ${d} ${MONTHS[currentMonth]} ${currentYear}</div>
+        <div class="slot-time-disp">${timeStr}</div>`;
+      document.getElementById('confirmBtn').disabled = false;
+
+      // Save to session for checkout
+      sessionStorage.setItem('sd_slot', JSON.stringify({ date: `${d} ${MONTHS[currentMonth]} ${currentYear}`, time: timeStr, slot_ref: 'BOO-' + Math.floor(Math.random()*9000+1000) }));
+    }
+
+    function changeMonth(delta) {
+      currentMonth += delta;
+      if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+      if (currentMonth < 0)  { currentMonth = 11; currentYear--; }
+      selectedDate = null; selectedSlot = null;
+      document.getElementById('timeSlotsPanel').style.display = 'none';
+      loadSlotsForMonth();
+    }
+
+    function renderCartSummary() {
+      const items = API.cart.get();
+      const el = document.getElementById('cart-items-display');
+      if (!items.length) {
+        el.innerHTML = '<p class="text-sm text-muted" style="text-align:center;">No items in basket</p>';
+        document.getElementById('cart-total').textContent = '£0.00';
+        return;
+      }
+      el.innerHTML = items.map(i => `
+        <div class="order-item-row">
+          <span class="name">${i.name} ×${i.qty}</span>
+          <span class="price">£${(i.price * i.qty).toFixed(2)}</span>
+        </div>`).join('');
+      const total = API.cart.total();
+      document.getElementById('cart-total').textContent = '£' + total.toFixed(2);
+      document.getElementById('confirmBtn').textContent = `Confirm Slot & Place Order — £${total.toFixed(2)}`;
+    }
+
+    async function confirmSlot() {
+      if (!selectedSlot) return;
+      const btn = document.getElementById('confirmBtn');
+      btn.disabled = true;
+      btn.textContent = 'Booking…';
+      try {
+        await API.bookSlot({ date: selectedSlot.date, time: selectedSlot.timeStr });
+        window.location.href = 'checkout.html';
+      } catch (err) {
+        alert('Could not book slot: ' + err.message);
+        btn.disabled = false;
+        btn.textContent = `Confirm Slot & Place Order — £${API.cart.total().toFixed(2)}`;
+      }
+    }
+
+    renderCartSummary();
+    loadSlotsForMonth();
+  </script>
+</body>
+</html>

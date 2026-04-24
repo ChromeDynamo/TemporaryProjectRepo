@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Trader Sign In — StreetDoko</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <nav class="auth-nav">
+    <a href="signin-landing.html" class="auth-nav-brand">Street<span>Doko</span></a>
+    <div style="display:flex; align-items:center; gap:10px;">
+      <a href="register.html?tab=trader" class="btn btn-outline btn-sm">Register as Trader</a>
+    </div>
+  </nav>
+
+  <div class="auth-split">
+
+    <div class="auth-visual">
+      <h2>Your trading hub</h2>
+      <p>Manage your product listings, track daily orders, view financial reports, and keep your shop running smoothly — all in one place.</p>
+      <div class="auth-visual-features">
+        <div class="auth-visual-feature"><span>Manage your product catalogue</span></div>
+        <div class="auth-visual-feature"><span>Track orders by collection slot</span></div>
+        <div class="auth-visual-feature"><span>View daily and weekly reports</span></div>
+        <div class="auth-visual-feature"><span>Monitor stock levels</span></div>
+        <div class="auth-visual-feature"><span>Update your shop information</span></div>
+      </div>
+    </div>
+
+    <div class="auth-form-side">
+      <div class="auth-form-box">
+        <div class="auth-logo">Street<span>Doko</span></div>
+        <p class="auth-subtitle">Trader Portal — Sign in to your account</p>
+
+        <div class="card">
+          <div id="error-msg" class="api-error" style="display:none;"></div>
+          <div class="form-stack">
+            <div class="form-group">
+              <label class="form-label" for="email">Email Address</label>
+              <input class="form-control" type="email" id="email" placeholder="trader@example.com" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="password">Password</label>
+              <input class="form-control" type="password" id="password" placeholder="Enter your password" required />
+            </div>
+            <div class="forgot-row">
+              <a href="#" class="forgot-link">Forgot password?</a>
+            </div>
+            <button class="btn btn-primary btn-full btn-lg" id="signinBtn" onclick="handleSignIn()">
+              Sign In to Trader Portal
+            </button>
+          </div>
+          <div class="divider-text mt-24">or</div>
+          <p class="register-prompt">
+            Not registered as a trader? <a href="register.html?tab=trader">Apply here</a>
+          </p>
+        </div>
+
+        <p class="text-center text-sm text-muted mt-16">
+          Looking to shop instead? <a href="login.html" class="fw-600">Customer sign in →</a>
+        </p>
+      </div>
+    </div>
+
+  </div>
+
+  <footer>
+    <div class="footer-bottom">
+      <div class="container footer-bottom-row">
+        <span>© 2026 StreetDoko. All rights reserved.</span>
+        <span style="display:flex; gap:20px;">
+          <a href="about.html" style="color:#666; font-size:12px;">About Us</a>
+          <a href="#" style="color:#666; font-size:12px;">Privacy Policy</a>
+        </span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="api.js"></script>
+  <script>
+    // If already logged in as trader, redirect to trader dashboard
+    if (API.isLoggedIn()) {
+      const user = API.getUser();
+      if (user && user.role === 'trader') window.location.href = 'trader-dashboard.html';
+    }
+
+    async function handleSignIn() {
+      const email = document.getElementById('email').value.trim();
+      const pwd   = document.getElementById('password').value;
+      const btn   = document.getElementById('signinBtn');
+      const errEl = document.getElementById('error-msg');
+
+      errEl.style.display = 'none';
+      if (!email || !pwd) { showErr('Please enter your email and password.'); return; }
+
+      btn.disabled = true;
+      btn.textContent = 'Signing in…';
+
+      try {
+        const data = await API.login(email, pwd, true);
+        // Verify they are actually a trader
+        if (data.user && data.user.role !== 'trader') {
+          API.clearToken();
+          showErr('This account is not registered as a trader. Please use the customer sign-in.');
+          btn.disabled = false;
+          btn.textContent = 'Sign In to Trader Portal';
+          return;
+        }
+        alert('Sign in successful. Redirecting to Trader Dashboard…');
+        // window.location.href = 'trader-dashboard.html';
+      } catch (err) {
+        showErr(err.message || 'Sign in failed. Please try again.');
+        btn.disabled = false;
+        btn.textContent = 'Sign In to Trader Portal';
+      }
+    }
+
+    function showErr(msg) {
+      const el = document.getElementById('error-msg');
+      el.textContent = msg;
+      el.style.display = 'block';
+    }
+
+    document.addEventListener('keydown', e => { if (e.key === 'Enter') handleSignIn(); });
+  </script>
+</body>
+</html>

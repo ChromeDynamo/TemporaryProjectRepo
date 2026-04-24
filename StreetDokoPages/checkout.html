@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Basket &amp; Checkout — StreetDoko</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <script src="api.js"></script>
+  <script src="navbar.js"></script>
+
+  <div class="checkout-hero">
+    <div class="container">
+      <div class="breadcrumb breadcrumb--light">
+        <a href="homepage.html">Home</a>
+        <span class="sep">›</span>
+        <span class="current">Basket</span>
+      </div>
+      <h1>Your Basket</h1>
+      <p>Review your items and confirm your collection slot before placing your order</p>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="checkout-layout">
+
+      <div>
+        <div class="basket-panel">
+          <div class="card">
+            <div class="basket-panel-header">
+              <h3>Basket Items</h3>
+              <span class="badge badge-dark" id="item-count">0 items</span>
+            </div>
+            <div id="basket-body">
+              <div class="api-loading">Loading basket…</div>
+            </div>
+            <div class="basket-footer">
+              <button class="btn btn-danger btn-sm" onclick="clearBasket()">Clear basket</button>
+              <a href="browse.html" class="btn btn-ghost btn-sm">Continue shopping</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="card mt-24">
+          <h4 class="mb-16">Discount / Coupon Code</h4>
+          <div class="coupon-row">
+            <input class="coupon-input" type="text" id="couponInput" placeholder="e.g. FRESH10" />
+            <button class="btn btn-outline btn-sm" onclick="applyCoupon()">Apply</button>
+          </div>
+          <div class="coupon-hint">Enter your coupon code above to apply a discount.</div>
+          <div class="coupon-success" id="couponSuccess" style="display:none;"></div>
+          <div id="coupon-error" class="api-error" style="display:none;"></div>
+        </div>
+      </div>
+
+      <div>
+        <div class="card">
+          <h3 class="mb-24">Order Summary</h3>
+          <div id="order-summary-breakdown" style="background:var(--grey-50); border-radius:var(--radius); padding:14px; margin-bottom:16px; font-size:13px;"></div>
+          <div class="summary-row"><span class="lbl">Subtotal</span><span class="val" id="subtotal-display">£0.00</span></div>
+          <div class="summary-row" id="discount-row" style="display:none;"><span class="lbl" id="discount-label">Discount</span><span class="val" id="discount-val">−£0.00</span></div>
+          <div class="summary-total"><span class="lbl">Total</span><span class="val" id="total-display">£0.00</span></div>
+
+          <div class="slot-card">
+            <div class="slot-card-header">
+              <h5>Collection Slot</h5>
+              <a href="slot-booking.html">Change</a>
+            </div>
+            <div class="slot-val" id="slot-val">No slot selected</div>
+            <div class="slot-deadline" id="slot-deadline"></div>
+          </div>
+
+          <div class="mt-20 mb-16">
+            <label class="form-label" style="display:block; margin-bottom:6px;">Additional Notes (optional)</label>
+            <textarea class="notes-area" id="orderNotes" rows="2" placeholder="Any special instructions for your traders…"></textarea>
+          </div>
+
+          <button class="paypal-btn" onclick="alert('PayPal integration — redirecting…')">Pay with PayPal</button>
+          <button class="place-order-btn" id="placeOrderBtn" onclick="placeOrder()" disabled>Place Order — £0.00</button>
+          <p class="security-note">Secure checkout · Confirmation email sent after order</p>
+        </div>
+
+        <div class="card mt-16" style="padding:16px; text-align:center;">
+          <div style="display:flex; justify-content:space-around; font-size:12px; color:var(--ink-muted);">
+            <span>Secure payment</span>
+            <span>Email confirmation</span>
+            <span>Local traders</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-top">
+      <div class="container">
+        <div class="footer-grid">
+          <div class="footer-col"><div class="footer-brand">StreetDoko</div><p class="footer-tagline">A click-and-collect marketplace for fresh, local produce.</p></div>
+          <div class="footer-col"><h5>Quick Links</h5><ul><li><a href="homepage.html">Home</a></li><li><a href="browse.html">Shop</a></li><li><a href="about.html">About Us</a></li></ul></div>
+          <div class="footer-col"><h5>Contact</h5><p>hello@streetdoko.com</p><p>01423 000 000</p></div>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom"><div class="container footer-bottom-row"><span>© 2026 StreetDoko. All rights reserved.</span><a href="#" style="color:#555;font-size:12px;">Privacy Policy</a></div></div>
+  </footer>
+
+  <script>
+    let discount = null; // { type, value, label }
+
+    function renderBasket() {
+      const items = API.cart.get();
+      const body  = document.getElementById('basket-body');
+      document.getElementById('item-count').textContent = items.length + ' item' + (items.length !== 1 ? 's' : '');
+
+      if (!items.length) {
+        body.innerHTML = '<div style="padding:32px; text-align:center; color:var(--ink-muted); font-size:14px;">Your basket is empty. <a href="browse.html">Start shopping →</a></div>';
+        updateSummary();
+        return;
+      }
+
+      // Group by trader
+      const byTrader = {};
+      items.forEach(i => {
+        if (!byTrader[i.trader_name]) byTrader[i.trader_name] = [];
+        byTrader[i.trader_name].push(i);
+      });
+
+      let html = '<table class="basket-table"><thead><tr><th>Product</th><th>Price</th><th>Qty</th><th>Subtotal</th><th></th></tr></thead><tbody>';
+      Object.entries(byTrader).forEach(([trader, traderItems]) => {
+        html += `<tr class="trader-section-row"><td colspan="5">${trader}</td></tr>`;
+        traderItems.forEach(item => {
+          html += `
+            <tr data-product-id="${item.product_id}">
+              <td>
+                <div class="basket-product-cell">
+                  <div class="basket-img"></div>
+                  <div>
+                    <div class="basket-product-name">${item.name}</div>
+                    <div class="basket-product-trader">SKU: ${item.sku}</div>
+                  </div>
+                </div>
+              </td>
+              <td>£${item.price.toFixed(2)}</td>
+              <td>
+                <div class="mini-stepper">
+                  <button class="mini-btn" onclick="updateQty(${item.product_id}, ${item.qty - 1})">−</button>
+                  <input class="mini-val" type="number" value="${item.qty}" min="1" max="6"
+                    onchange="updateQty(${item.product_id}, parseInt(this.value))" />
+                  <button class="mini-btn" onclick="updateQty(${item.product_id}, ${item.qty + 1})">+</button>
+                </div>
+              </td>
+              <td><strong>£${(item.price * item.qty).toFixed(2)}</strong></td>
+              <td><button class="remove-link" onclick="removeItem(${item.product_id})">Remove</button></td>
+            </tr>`;
+        });
+      });
+      html += '</tbody></table>';
+      body.innerHTML = html;
+      updateSummary();
+    }
+
+    function updateQty(productId, newQty) {
+      if (newQty < 1) { removeItem(productId); return; }
+      API.cart.update(productId, newQty);
+      renderBasket();
+    }
+
+    function removeItem(productId) {
+      API.cart.remove(productId);
+      renderBasket();
+    }
+
+    function clearBasket() {
+      if (confirm('Clear your entire basket?')) { API.cart.clear(); renderBasket(); }
+    }
+
+    function updateSummary() {
+      const items = API.cart.get();
+      const subtotal = items.reduce((s, i) => s + i.price * i.qty, 0);
+
+      // Breakdown by trader
+      const byTrader = {};
+      items.forEach(i => { byTrader[i.trader_name] = (byTrader[i.trader_name] || 0) + i.price * i.qty; });
+      document.getElementById('order-summary-breakdown').innerHTML = Object.entries(byTrader)
+        .map(([t, v]) => `<div style="display:flex;justify-content:space-between;margin-bottom:8px;"><span>${t}</span><span class="fw-600">£${v.toFixed(2)}</span></div>`)
+        .join('') || '<span class="text-muted" style="font-size:13px;">No items</span>';
+
+      let discountAmount = 0;
+      if (discount) {
+        discountAmount = discount.type === 'percent' ? subtotal * (discount.value / 100) : discount.value;
+        document.getElementById('discount-row').style.display = 'flex';
+        document.getElementById('discount-label').textContent = 'Discount (' + discount.label + ')';
+        document.getElementById('discount-val').textContent = '−£' + discountAmount.toFixed(2);
+      } else {
+        document.getElementById('discount-row').style.display = 'none';
+      }
+
+      const total = Math.max(0, subtotal - discountAmount);
+      document.getElementById('subtotal-display').textContent = '£' + subtotal.toFixed(2);
+      document.getElementById('total-display').textContent = '£' + total.toFixed(2);
+
+      const btn = document.getElementById('placeOrderBtn');
+      btn.textContent = `Place Order — £${total.toFixed(2)}`;
+      btn.disabled = items.length === 0;
+    }
+
+    async function applyCoupon() {
+      const code = document.getElementById('couponInput').value.trim();
+      const successEl = document.getElementById('couponSuccess');
+      const errorEl   = document.getElementById('coupon-error');
+      successEl.style.display = 'none';
+      errorEl.style.display   = 'none';
+
+      if (!code) return;
+      try {
+        const data = await API.validateCoupon(code);
+        discount = data;
+        successEl.textContent = 'Coupon applied — ' + data.label;
+        successEl.style.display = 'block';
+        updateSummary();
+      } catch (err) {
+        errorEl.textContent = err.message || 'Invalid coupon code.';
+        errorEl.style.display = 'block';
+        discount = null;
+        updateSummary();
+      }
+    }
+
+    // Load slot from session storage (set by slot-booking page)
+    function loadSlot() {
+      try {
+        const slot = JSON.parse(sessionStorage.getItem('sd_slot'));
+        if (slot) {
+          document.getElementById('slot-val').textContent = `${slot.date} · ${slot.time}`;
+          document.getElementById('slot-deadline').textContent = slot.deadline || '';
+        }
+      } catch {}
+    }
+
+    async function placeOrder() {
+      const items = API.cart.get();
+      if (!items.length) { alert('Your basket is empty.'); return; }
+
+      const btn = document.getElementById('placeOrderBtn');
+      btn.disabled = true;
+      btn.textContent = 'Placing order…';
+
+      try {
+        const slot = (() => { try { return JSON.parse(sessionStorage.getItem('sd_slot')); } catch { return null; } })();
+        const subtotal = items.reduce((s, i) => s + i.price * i.qty, 0);
+        const discountAmount = discount
+          ? (discount.type === 'percent' ? subtotal * (discount.value / 100) : discount.value)
+          : 0;
+
+        const payload = {
+          items: items.map(i => ({ product_id: i.product_id, qty: i.qty, unit_price: i.price })),
+          subtotal, discount: discountAmount, total: subtotal - discountAmount,
+          coupon_code: discount ? document.getElementById('couponInput').value.trim() : null,
+          slot_date: slot?.date, slot_time: slot?.time, slot_ref: slot?.slot_ref,
+          notes: document.getElementById('orderNotes').value.trim(),
+        };
+
+        const data = await API.createOrder(payload);
+        // Store order ref for confirmation page
+        sessionStorage.setItem('sd_last_order', JSON.stringify(data.order));
+        API.cart.clear();
+        window.location.href = 'order-confirmation.html';
+      } catch (err) {
+        alert('Could not place order: ' + err.message);
+        btn.disabled = false;
+        updateSummary();
+      }
+    }
+
+    renderBasket();
+    loadSlot();
+  </script>
+</body>
+</html>

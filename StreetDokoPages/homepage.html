@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Home — StreetDoko</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <script src="api.js"></script>
+  <script src="navbar.js"></script>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="container hero-content">
+      <div class="hero-tagline">Fresh · Local · Click &amp; Collect</div>
+      <h1>Your local market, delivered to your hands</h1>
+      <p class="hero-sub">Shop across five specialist traders — butcher, greengrocer, fishmonger, bakery, and deli — in one seamless order.</p>
+      <div class="hero-cta">
+        <a href="browse.html" class="btn btn-primary btn-lg">Start Shopping</a>
+        <a href="slot-booking.html" class="btn btn-outline-white btn-lg">Book a Slot</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Collect info strip -->
+  <div class="collect-strip">
+    <div class="container">
+      <div class="collect-item">Wed – Fri collection</div>
+      <div class="collect-item">Book 24 hrs in advance</div>
+      <div class="collect-item">Max 20 orders per slot</div>
+      <div class="collect-item">One collection point</div>
+    </div>
+  </div>
+
+  <!-- Our Traders — loaded from API -->
+  <section class="section" style="background:var(--white);">
+    <div class="container">
+      <div class="section-header">
+        <h2>Our Traders</h2>
+        <a href="browse.html" class="section-link">View all →</a>
+      </div>
+      <div class="grid-5" id="traders-grid">
+        <div class="api-loading">Loading traders…</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Deals — loaded from API (products with discount) -->
+  <section class="section" style="background:var(--grey-50);">
+    <div class="container">
+      <div class="deals-header">
+        <div>
+          <h2>This Week's Deals</h2>
+          <p>Limited-time offers from our traders — updated every Monday</p>
+        </div>
+        <a href="browse.html" class="btn btn-outline-white btn-sm">Browse all →</a>
+      </div>
+      <div class="grid-3" id="deals-grid">
+        <div class="api-loading">Loading deals…</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Featured Products — loaded from API -->
+  <section class="section" style="background:var(--white);">
+    <div class="container">
+      <div class="section-header">
+        <h2>Featured Products</h2>
+        <a href="browse.html" class="section-link">Browse all →</a>
+      </div>
+      <div class="grid-3" id="featured-grid">
+        <div class="api-loading">Loading products…</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Reviews (static — could be loaded from API similarly) -->
+  <section class="section" style="background:var(--grey-50);">
+    <div class="container">
+      <div class="section-header"><h2>What Our Customers Say</h2></div>
+      <div class="grid-3">
+        <div class="review-card">
+          <div class="review-card-header">
+            <div class="review-avatar">S</div>
+            <div>
+              <div class="fw-600" style="font-size:14px;">Sarah M.</div>
+              <div class="text-xs text-muted">Harrogate</div>
+              <div class="stars mt-8">★★★★★</div>
+            </div>
+          </div>
+          <p class="text-sm">"Incredible quality — the ribeye was perfectly fresh and the whole ordering process was so easy. Will definitely be back every week."</p>
+          <div class="mt-12 text-xs text-muted">Grass-fed Ribeye · <a href="browse.html?trader=butcher">The Butcher</a></div>
+        </div>
+        <div class="review-card">
+          <div class="review-card-header">
+            <div class="review-avatar">T</div>
+            <div>
+              <div class="fw-600" style="font-size:14px;">Tom R.</div>
+              <div class="text-xs text-muted">Knaresborough</div>
+              <div class="stars mt-8">★★★★★</div>
+            </div>
+          </div>
+          <p class="text-sm">"Best sourdough I've had outside of London. The collection slot system works brilliantly — no queues, just grab and go."</p>
+          <div class="mt-12 text-xs text-muted">Sourdough Loaf · <a href="browse.html?trader=bakery">The Bakery</a></div>
+        </div>
+        <div class="review-card">
+          <div class="review-card-header">
+            <div class="review-avatar">L</div>
+            <div>
+              <div class="fw-600" style="font-size:14px;">Lena K.</div>
+              <div class="text-xs text-muted">Ripon</div>
+              <div class="stars mt-8">★★★★☆</div>
+            </div>
+          </div>
+          <p class="text-sm">"Supporting local traders has never been so convenient. The veg box was stunning — everything so fresh. Love this platform."</p>
+          <div class="mt-12 text-xs text-muted">Heritage Carrots · <a href="browse.html?trader=greengrocer">Greengrocer</a></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Click & Collect CTA -->
+  <section class="collect-cta" id="collect-cta">
+    <div class="container">
+      <h2>Ready to Collect?</h2>
+      <p>Book your collection slot and your order will be packed and ready when you arrive.</p>
+      <div class="collect-stats">
+        <div class="collect-stat-item"><div class="num">3</div><div class="lbl">Collection Days</div></div>
+        <div class="collect-stat-item"><div class="num">20</div><div class="lbl">Max Orders / Slot</div></div>
+        <div class="collect-stat-item"><div class="num">24h</div><div class="lbl">Advance Booking</div></div>
+      </div>
+      <a href="slot-booking.html" class="btn btn-outline-white btn-lg">Book a Slot →</a>
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer-top">
+      <div class="container">
+        <div class="footer-grid">
+          <div class="footer-col">
+            <div class="footer-brand">StreetDoko</div>
+            <p class="footer-tagline">A click-and-collect marketplace connecting you with the finest local traders in your area.</p>
+          </div>
+          <div class="footer-col">
+            <h5>Quick Links</h5>
+            <ul>
+              <li><a href="homepage.html">Home</a></li>
+              <li><a href="browse.html">Shop</a></li>
+              <li><a href="about.html">About Us</a></li>
+              <li><a href="profile.html">My Account</a></li>
+            </ul>
+          </div>
+          <div class="footer-col">
+            <h5>Our Traders</h5>
+            <ul>
+              <li><a href="browse.html?trader=butcher">The Butcher</a></li>
+              <li><a href="browse.html?trader=greengrocer">Greengrocer</a></li>
+              <li><a href="browse.html?trader=fishmonger">Fishmonger</a></li>
+              <li><a href="browse.html?trader=bakery">The Bakery</a></li>
+              <li><a href="browse.html?trader=deli">Delicatessen</a></li>
+            </ul>
+          </div>
+          <div class="footer-col">
+            <h5>Contact</h5>
+            <p>hello@streetdoko.com</p>
+            <p>01423 000 000</p>
+            <p>Market Hall, Town Centre</p>
+            <p>Collection: Wed – Fri</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="container footer-bottom-row">
+        <span>© 2026 StreetDoko. All rights reserved.</span>
+        <a href="#" style="color:#555; font-size:12px;">Privacy Policy</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // ── Traders ──────────────────────────────────────────────────────────────
+    async function loadTraders() {
+      const grid = document.getElementById('traders-grid');
+      try {
+        const data = await API.getTraders();
+        grid.innerHTML = data.items.map(t => `
+          <a href="browse.html?trader=${t.slug}" class="trader-card card-hover" style="text-decoration:none;">
+            <div class="trader-card-img"></div>
+            <div class="trader-card-body">
+              <div class="trader-card-name">${t.name}</div>
+              <div class="trader-card-desc">${t.description}</div>
+              <span class="badge badge-dark">${t.item_count} items</span>
+            </div>
+          </a>
+        `).join('');
+      } catch (err) {
+        API.showError(grid, 'Could not load traders. ' + err.message);
+      }
+    }
+
+    // ── Deals (products with original_price) ─────────────────────────────────
+    async function loadDeals() {
+      const grid = document.getElementById('deals-grid');
+      try {
+        const data = await API.getProducts();
+        const deals = data.items.filter(p => p.original_price).slice(0, 3);
+        grid.innerHTML = deals.map(p => {
+          const discPct = Math.round((1 - p.price / p.original_price) * 100);
+          const stock = p.stock_qty <= 5 ? '<span class="badge badge-light">Low Stock</span>' : '<span class="badge badge-green">In Stock</span>';
+          return `
+            <div class="product-card">
+              <a href="product.html?id=${p.product_id}" style="text-decoration:none; color:inherit;">
+                <div class="product-card-img">
+                  <span class="discount-badge-abs">${discPct}% OFF</span>
+                </div>
+                <div class="product-card-body">
+                  <div class="product-card-cat">${p.category}</div>
+                  <div class="product-card-trader">${p.trader_name}</div>
+                  <div class="product-card-name">${p.name}</div>
+                  <div class="product-price"><span class="price">£${p.price.toFixed(2)}</span><span class="price-orig">£${p.original_price.toFixed(2)}</span></div>
+                </div>
+              </a>
+              <div class="product-card-footer">
+                ${stock}
+                <button class="btn btn-primary btn-sm" onclick="addToCart(${JSON.stringify(p).replace(/"/g,'&quot;')})">Add</button>
+              </div>
+            </div>`;
+        }).join('');
+      } catch (err) {
+        API.showError(grid, 'Could not load deals. ' + err.message);
+      }
+    }
+
+    // ── Featured (no discount, first 3) ──────────────────────────────────────
+    async function loadFeatured() {
+      const grid = document.getElementById('featured-grid');
+      try {
+        const data = await API.getProducts();
+        const featured = data.items.filter(p => !p.original_price).slice(0, 3);
+        grid.innerHTML = featured.map(p => `
+          <div class="product-card">
+            <a href="product.html?id=${p.product_id}" style="text-decoration:none; color:inherit;">
+              <div class="product-card-img"></div>
+              <div class="product-card-body">
+                <div class="product-card-cat">${p.category}</div>
+                <div class="product-card-trader">${p.trader_name}</div>
+                <div class="product-card-name">${p.name}</div>
+                <div class="product-price"><span class="price">£${p.price.toFixed(2)}</span></div>
+                <div class="freshness-bar"><div class="freshness-fill" style="width:${p.freshness_score}%"></div></div>
+              </div>
+            </a>
+            <div class="product-card-footer">
+              <a href="product.html?id=${p.product_id}" class="text-sm">Show more</a>
+              <button class="btn btn-primary btn-sm" onclick="addToCart(${JSON.stringify(p).replace(/"/g,'&quot;')})">Add</button>
+            </div>
+          </div>`).join('');
+      } catch (err) {
+        API.showError(grid, 'Could not load products. ' + err.message);
+      }
+    }
+
+    function addToCart(product) {
+      API.cart.add(product);
+      // Brief visual feedback
+      event.target.textContent = '✓ Added';
+      setTimeout(() => event.target.textContent = 'Add', 1200);
+    }
+
+    loadTraders();
+    loadDeals();
+    loadFeatured();
+  </script>
+</body>
+</html>

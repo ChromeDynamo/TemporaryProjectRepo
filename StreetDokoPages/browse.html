@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Shop — StreetDoko</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <script src="api.js"></script>
+  <script src="navbar.js"></script>
+
+  <div class="page-hero">
+    <div class="container">
+      <div class="hero-tagline">Browse</div>
+      <h1>Shop All Products</h1>
+      <p>Explore fresh produce from all five of our local traders</p>
+    </div>
+  </div>
+
+  <!-- Search bar -->
+  <div class="search-bar-wrap">
+    <div class="container">
+      <div class="search-bar">
+        <div class="search-input-wrap">
+          <input class="search-input" type="text" id="searchInput" placeholder="Search products across all traders…" oninput="debounceSearch()" />
+        </div>
+        <button class="btn btn-primary" onclick="applyFilters()">Search</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Trader tabs -->
+  <div class="trader-tabs-bar">
+    <div class="container">
+      <div class="trader-tabs-inner" id="trader-tabs">
+        <button class="trader-tab active" data-slug="" onclick="setTrader(this)">All Traders</button>
+        <button class="trader-tab" data-slug="butcher" onclick="setTrader(this)">The Butcher</button>
+        <button class="trader-tab" data-slug="greengrocer" onclick="setTrader(this)">Greengrocer</button>
+        <button class="trader-tab" data-slug="fishmonger" onclick="setTrader(this)">Fishmonger</button>
+        <button class="trader-tab" data-slug="bakery" onclick="setTrader(this)">The Bakery</button>
+        <button class="trader-tab" data-slug="deli" onclick="setTrader(this)">Delicatessen</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="shop-layout">
+
+      <!-- Sidebar filters -->
+      <aside class="shop-sidebar">
+        <div class="filter-panel">
+          <h5>Category</h5>
+          <select id="category-select" class="sort-select" style="width:100%;" onchange="applyFilters()">
+            <option value="">All Categories</option>
+          </select>
+        </div>
+        <div class="filter-panel">
+          <h5>Price Range</h5>
+          <input type="range" min="0" max="50" value="50" id="price-range" oninput="document.getElementById('price-val').textContent='£0 – £'+this.value; applyFilters();" />
+          <div class="price-range-display"><span id="price-val">£0 – £50</span><span>£50</span></div>
+        </div>
+        <div class="filter-panel">
+          <h5>Availability</h5>
+          <div class="filter-option"><input type="radio" name="avail" id="a-in" onchange="applyFilters()" /><label for="a-in">In stock only</label></div>
+          <div class="filter-option"><input type="radio" name="avail" id="a-all" checked onchange="applyFilters()" /><label for="a-all">Show all (incl. out of stock)</label></div>
+        </div>
+        <div class="filter-panel">
+          <h5>Deals</h5>
+          <div class="filter-option"><input type="checkbox" id="dealsOnly" onchange="applyFilters()" /><label for="dealsOnly">Deals Only</label></div>
+        </div>
+        <button class="btn btn-ghost btn-full btn-sm" onclick="clearFilters()">Clear All Filters</button>
+      </aside>
+
+      <!-- Products -->
+      <div>
+        <div class="products-header">
+          <p id="result-count">Loading products…</p>
+          <select class="sort-select" id="sortSelect" onchange="applyFilters()">
+            <option value="default">Sort: Relevance</option>
+            <option value="price-asc">Price: Low to High</option>
+            <option value="price-desc">Price: High to Low</option>
+            <option value="name">Name A–Z</option>
+          </select>
+        </div>
+
+        <div class="product-grid" id="products-grid">
+          <div class="api-loading">Loading products…</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-top">
+      <div class="container">
+        <div class="footer-grid">
+          <div class="footer-col">
+            <div class="footer-brand">StreetDoko</div>
+            <p class="footer-tagline">A click-and-collect marketplace for fresh, local produce.</p>
+          </div>
+          <div class="footer-col">
+            <h5>Quick Links</h5>
+            <ul>
+              <li><a href="homepage.html">Home</a></li>
+              <li><a href="browse.html">Shop</a></li>
+              <li><a href="about.html">About Us</a></li>
+              <li><a href="profile.html">My Account</a></li>
+            </ul>
+          </div>
+          <div class="footer-col">
+            <h5>Our Traders</h5>
+            <ul>
+              <li><a href="browse.html?trader=butcher">The Butcher</a></li>
+              <li><a href="browse.html?trader=greengrocer">Greengrocer</a></li>
+              <li><a href="browse.html?trader=fishmonger">Fishmonger</a></li>
+              <li><a href="browse.html?trader=bakery">The Bakery</a></li>
+              <li><a href="browse.html?trader=deli">Delicatessen</a></li>
+            </ul>
+          </div>
+          <div class="footer-col">
+            <h5>Contact</h5>
+            <p>hello@streetdoko.com</p>
+            <p>01423 000 000</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="container footer-bottom-row">
+        <span>© 2026 StreetDoko. All rights reserved.</span>
+        <a href="#" style="color:#555; font-size:12px;">Privacy Policy</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    let allProducts = [];
+    let searchTimer;
+
+    async function init() {
+      // Load all products
+      try {
+        const pd = await API.getProducts();
+        allProducts = pd.items;
+
+        // Build category dropdown
+        const cats = [...new Set(allProducts.map(p => p.category))];
+        const cSelect = document.getElementById('category-select');
+        cats.forEach(c => {
+          const opt = document.createElement('option');
+          opt.value = c; opt.textContent = c;
+          cSelect.appendChild(opt);
+        });
+
+        // Apply URL params (e.g. ?trader=butcher)
+        const params = new URLSearchParams(window.location.search);
+        const urlTrader = params.get('trader');
+        if (urlTrader) {
+          const tab = document.querySelector(`.trader-tab[data-slug="${urlTrader}"]`);
+          if (tab) {
+            document.querySelectorAll('.trader-tab').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+          }
+        }
+
+        applyFilters();
+      } catch (err) {
+        API.showError('products-grid', 'Could not load products. ' + err.message);
+      }
+    }
+
+    function debounceSearch() {
+      clearTimeout(searchTimer);
+      searchTimer = setTimeout(applyFilters, 250);
+    }
+
+    function setTrader(el) {
+      document.querySelectorAll('.trader-tab').forEach(t => t.classList.remove('active'));
+      el.classList.add('active');
+      applyFilters();
+    }
+
+    function applyFilters() {
+      const activeTab = document.querySelector('.trader-tab.active');
+      const trader    = activeTab ? activeTab.dataset.slug : '';
+      const category  = document.getElementById('category-select').value;
+      const q         = document.getElementById('searchInput').value.trim().toLowerCase();
+      const inStock   = document.getElementById('a-in').checked;
+      const dealsOnly = document.getElementById('dealsOnly').checked;
+      const sort      = document.getElementById('sortSelect').value;
+      const maxPrice  = parseFloat(document.getElementById('price-range').value);
+
+      let list = allProducts.filter(p => {
+        if (trader && !API._traderMatch(p, trader)) return false;
+        if (category && p.category !== category) return false;
+        if (q && !p.name.toLowerCase().includes(q) && !p.category.toLowerCase().includes(q)) return false;
+        if (inStock && p.stock_qty <= 0) return false;
+        if (dealsOnly && !p.original_price) return false;
+        if (p.price > maxPrice) return false;
+        return true;
+      });
+
+      if (sort === 'price-asc') list.sort((a,b) => a.price - b.price);
+      else if (sort === 'price-desc') list.sort((a,b) => b.price - a.price);
+      else if (sort === 'name') list.sort((a,b) => a.name.localeCompare(b.name));
+
+      renderProducts(list);
+    }
+
+    function renderProducts(list) {
+      const grid = document.getElementById('products-grid');
+      document.getElementById('result-count').innerHTML = `Showing <strong>${list.length}</strong> product${list.length !== 1 ? 's' : ''}`;
+
+      if (!list.length) {
+        grid.innerHTML = '<div class="api-error" style="grid-column:1/-1;">No products match your filters.</div>';
+        return;
+      }
+
+      grid.innerHTML = list.map(p => {
+        const discPct = p.original_price ? Math.round((1 - p.price / p.original_price) * 100) : null;
+        const stockBadge = p.stock_qty <= 0 ? '<span class="badge badge-muted">Out of Stock</span>'
+          : p.stock_qty <= 5 ? '<span class="badge badge-light">Low Stock</span>'
+          : '<span class="badge badge-green">In Stock</span>';
+        const addBtn = p.stock_qty <= 0
+          ? '<button class="btn btn-ghost btn-sm" disabled style="opacity:.5; cursor:not-allowed;">Out of stock</button>'
+          : `<button class="btn btn-primary btn-sm" onclick="addToCart(${JSON.stringify(p).replace(/"/g,'&quot;')}, this)">Add</button>`;
+        return `
+          <div class="product-card">
+            <a href="product.html?id=${p.product_id}" style="text-decoration:none; color:inherit;">
+              <div class="product-card-img">
+                ${discPct ? `<span class="discount-badge-abs">${discPct}% OFF</span>` : ''}
+              </div>
+              <div class="product-card-body">
+                <div class="product-card-cat">${p.category}</div>
+                <div class="product-card-trader">${p.trader_name}</div>
+                <div class="product-card-name">${p.name}</div>
+                <div class="product-price">
+                  <span class="price">£${p.price.toFixed(2)}</span>
+                  ${p.original_price ? `<span class="price-orig">£${p.original_price.toFixed(2)}</span>` : ''}
+                </div>
+              </div>
+            </a>
+            <div class="product-card-footer">
+              ${stockBadge}
+              ${addBtn}
+            </div>
+          </div>`;
+      }).join('');
+    }
+
+    function addToCart(product, btn) {
+      API.cart.add(product);
+      btn.textContent = '✓';
+      setTimeout(() => btn.textContent = 'Add', 1200);
+    }
+
+    function clearFilters() {
+      document.getElementById('category-select').value = '';
+      document.getElementById('dealsOnly').checked = false;
+      document.getElementById('a-all').checked = true;
+      document.getElementById('price-range').value = 50;
+      document.getElementById('price-val').textContent = '£0 – £50';
+      document.getElementById('searchInput').value = '';
+      applyFilters();
+    }
+
+    // Helper used in filter
+    API._traderMatch = function(product, slug) {
+      const name = product.trader_name.toLowerCase().replace(/\s+/g, '');
+      const map = { butcher:'thebutcher', greengrocer:'greengrocer', fishmonger:'fishmonger', bakery:'thebakery', deli:'delicatessen' };
+      return name === (map[slug] || slug);
+    };
+
+    init();
+  </script>
+</body>
+</html>

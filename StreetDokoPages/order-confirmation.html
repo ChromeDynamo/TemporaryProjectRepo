@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Order Confirmed — StreetDoko</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <script src="api.js"></script>
+  <script src="navbar.js"></script>
+
+  <div id="page-loading" class="api-loading" style="padding:60px 0; text-align:center;">Loading order…</div>
+  <div id="page-content" style="display:none;">
+
+    <div class="confirm-banner">
+      <h1>Order Confirmed!</h1>
+      <p>Thank you for your order. A confirmation email has been sent to <strong style="color:#fff;" id="confirm-email">—</strong></p>
+      <div class="confirm-order-no" id="confirm-ref">ORDER #—</div>
+    </div>
+
+    <div class="container">
+      <div class="invoice-layout">
+        <div class="invoice-card">
+
+          <div class="invoice-head">
+            <div>
+              <div class="invoice-brand">Street<span>Doko</span></div>
+              <div class="invoice-meta">
+                <p>Order Reference: <span id="inv-ref">—</span></p>
+                <p>Date: <span id="inv-date">—</span></p>
+              </div>
+            </div>
+            <div class="invoice-status-badge">ORDER CONFIRMED</div>
+          </div>
+
+          <div class="invoice-details">
+            <div class="invoice-detail-col">
+              <h5>Customer Details</h5>
+              <div class="invoice-detail-row"><span class="lbl">Name</span><span class="val" id="cust-name">—</span></div>
+              <div class="invoice-detail-row"><span class="lbl">Email</span><span class="val" id="cust-email">—</span></div>
+              <div class="invoice-detail-row"><span class="lbl">Phone</span><span class="val" id="cust-phone">—</span></div>
+            </div>
+            <div class="invoice-detail-col">
+              <h5>Collection Details</h5>
+              <div class="invoice-detail-row"><span class="lbl">Location</span><span class="val">Market Hall, Town Centre</span></div>
+              <div class="invoice-detail-row"><span class="lbl">Date</span><span class="val" id="coll-date">—</span></div>
+              <div class="collection-highlight">
+                <div class="slot-time" id="coll-time">—</div>
+                <div class="slot-ref" id="coll-ref">Booking ref: —</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="invoice-table-wrap">
+            <table class="invoice-table">
+              <thead>
+                <tr>
+                  <th>Item</th><th>Trader</th>
+                  <th style="text-align:center;">Qty</th>
+                  <th style="text-align:right;">Unit Price</th>
+                  <th>Total</th>
+                </tr>
+              </thead>
+              <tbody id="invoice-tbody"></tbody>
+            </table>
+          </div>
+
+          <div class="invoice-totals">
+            <div class="total-row"><span class="lbl">Subtotal</span><span class="val" id="inv-subtotal">£0.00</span></div>
+            <div class="total-row" id="inv-discount-row" style="display:none;"><span class="lbl" id="inv-discount-label">Discount</span><span class="val" id="inv-discount">−£0.00</span></div>
+            <div class="total-final"><span class="lbl">Total Paid</span><span class="val" id="inv-total">£0.00</span></div>
+          </div>
+
+          <div class="email-notice">
+            <span>A full invoice has been emailed to <a id="inv-email-link" class="fw-600">—</a>. Please keep this for your records.</span>
+          </div>
+
+          <div class="invoice-actions">
+            <button class="btn btn-primary" onclick="window.print()">Print Invoice</button>
+            <button class="btn btn-outline" onclick="alert('PDF download — available in the live build.')">Download PDF</button>
+            <a href="homepage.html" class="btn btn-ghost">Back to Home</a>
+            <a href="profile.html" class="btn btn-ghost ml-auto">View Order History →</a>
+          </div>
+        </div>
+
+        <div class="card mt-32">
+          <h3 class="mb-24">What happens next?</h3>
+          <div class="grid-3">
+            <div class="text-center">
+              <h4 class="mb-8">Traders prepare your order</h4>
+              <p class="text-sm">Each trader begins preparing your items fresh before your collection slot.</p>
+            </div>
+            <div class="text-center">
+              <h4 class="mb-8">You'll receive a reminder</h4>
+              <p class="text-sm">We'll send a reminder email the morning of your collection date.</p>
+            </div>
+            <div class="text-center">
+              <h4 class="mb-8">Collect at the Market Hall</h4>
+              <p class="text-sm">Show your booking reference at the collection point to receive your order.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-top">
+      <div class="container">
+        <div class="footer-grid">
+          <div class="footer-col"><div class="footer-brand">StreetDoko</div><p class="footer-tagline">A click-and-collect marketplace for fresh, local produce.</p></div>
+          <div class="footer-col"><h5>Quick Links</h5><ul><li><a href="homepage.html">Home</a></li><li><a href="browse.html">Shop</a></li><li><a href="about.html">About Us</a></li><li><a href="profile.html">My Account</a></li></ul></div>
+          <div class="footer-col"><h5>Contact</h5><p>hello@streetdoko.com</p><p>01423 000 000</p></div>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom"><div class="container footer-bottom-row"><span>© 2026 StreetDoko. All rights reserved.</span><a href="#" style="color:#555;font-size:12px;">Privacy Policy</a></div></div>
+  </footer>
+
+  <script>
+    async function loadOrder() {
+      // Try URL param first (?id=72), then last order from session
+      const urlId = new URLSearchParams(window.location.search).get('id');
+      let order = null;
+
+      try {
+        if (urlId) {
+          const data = await API.getOrder(urlId);
+          order = data.order;
+        } else {
+          order = JSON.parse(sessionStorage.getItem('sd_last_order'));
+          if (!order) throw new Error('No order found');
+        }
+      } catch (err) {
+        document.getElementById('page-loading').innerHTML = `<div class="api-error" style="margin:40px auto;max-width:400px;">Could not load order. ${err.message}</div>`;
+        return;
+      }
+
+      const user = API.getUser() || {};
+      const email = user.email || 'customer@example.com';
+
+      document.getElementById('page-loading').style.display = 'none';
+      document.getElementById('page-content').style.display = '';
+
+      document.getElementById('confirm-email').textContent = email;
+      document.getElementById('confirm-ref').textContent   = 'ORDER #' + order.order_ref;
+      document.getElementById('inv-ref').textContent       = '#' + order.order_ref;
+      document.getElementById('inv-date').textContent      = formatDate(order.created_at);
+
+      document.getElementById('cust-name').textContent  = `${user.first_name || 'Jane'} ${user.last_name || 'Smith'}`;
+      document.getElementById('cust-email').textContent = email;
+      document.getElementById('cust-phone').textContent = user.phone || '—';
+
+      document.getElementById('coll-date').textContent = order.slot_date ? formatDateLong(order.slot_date) : '—';
+      document.getElementById('coll-time').textContent = order.slot_time || '—';
+      document.getElementById('coll-ref').textContent  = 'Booking ref: ' + (order.slot_ref || '—');
+
+      // Items table
+      const items = order.items || [];
+      let tbody = '';
+      if (items.length) {
+        const byTrader = {};
+        items.forEach(i => { if (!byTrader[i.trader_name]) byTrader[i.trader_name] = []; byTrader[i.trader_name].push(i); });
+        Object.entries(byTrader).forEach(([trader, tItems]) => {
+          tbody += `<tr class="trader-section-header"><td colspan="5">${trader}</td></tr>`;
+          tItems.forEach(i => {
+            tbody += `
+              <tr>
+                <td><div class="fw-600">${i.name}</div><div class="text-xs text-muted">SKU: ${i.sku || '—'}</div></td>
+                <td>${i.trader_name}</td>
+                <td style="text-align:center;">${i.qty}</td>
+                <td style="text-align:right;">£${i.unit_price.toFixed(2)}</td>
+                <td>£${i.subtotal.toFixed(2)}</td>
+              </tr>`;
+          });
+        });
+      } else {
+        tbody = '<tr><td colspan="5" style="text-align:center;color:var(--ink-muted);">No items</td></tr>';
+      }
+      document.getElementById('invoice-tbody').innerHTML = tbody;
+
+      document.getElementById('inv-subtotal').textContent = '£' + (order.subtotal || 0).toFixed(2);
+      if (order.discount) {
+        document.getElementById('inv-discount-row').style.display = 'flex';
+        document.getElementById('inv-discount-label').textContent = 'Discount' + (order.coupon_code ? ` (${order.coupon_code})` : '');
+        document.getElementById('inv-discount').textContent = '−£' + order.discount.toFixed(2);
+      }
+      document.getElementById('inv-total').textContent = '£' + (order.total || 0).toFixed(2);
+      document.getElementById('inv-email-link').textContent = email;
+      document.getElementById('inv-email-link').href = `mailto:${email}`;
+
+      document.title = `Order #${order.order_ref} — StreetDoko`;
+    }
+
+    function formatDate(str) {
+      if (!str) return '—';
+      return new Date(str).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+    }
+    function formatDateLong(str) {
+      if (!str) return '—';
+      return new Date(str).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    }
+
+    loadOrder();
+  </script>
+</body>
+</html>

@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Product — StreetDoko</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <script src="api.js"></script>
+  <script src="navbar.js"></script>
+
+  <div class="container" id="page-content">
+    <div class="api-loading" style="padding:80px 0;">Loading product…</div>
+  </div>
+
+  <section class="section" style="background:var(--grey-50);" id="related-section" style="display:none;">
+    <div class="container">
+      <div class="section-header">
+        <h2 id="related-title">More from this Trader</h2>
+        <a href="browse.html" class="section-link">View all →</a>
+      </div>
+      <div class="grid-4" id="related-grid">
+        <div class="api-loading">Loading…</div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer-top">
+      <div class="container">
+        <div class="footer-grid">
+          <div class="footer-col"><div class="footer-brand">StreetDoko</div><p class="footer-tagline">A click-and-collect marketplace for fresh, local produce.</p></div>
+          <div class="footer-col"><h5>Quick Links</h5><ul><li><a href="homepage.html">Home</a></li><li><a href="browse.html">Shop</a></li><li><a href="about.html">About Us</a></li><li><a href="profile.html">My Account</a></li></ul></div>
+          <div class="footer-col"><h5>Contact</h5><p>hello@streetdoko.com</p><p>01423 000 000</p></div>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom"><div class="container footer-bottom-row"><span>© 2026 StreetDoko. All rights reserved.</span><a href="#" style="color:#555;font-size:12px;">Privacy Policy</a></div></div>
+  </footer>
+
+  <script>
+    const productId = new URLSearchParams(window.location.search).get('id') || 1;
+    let currentProduct = null;
+    let qty = 1;
+
+    async function loadProduct() {
+      const content = document.getElementById('page-content');
+      try {
+        const data = await API.getProduct(productId);
+        currentProduct = data.product;
+        const p = currentProduct;
+        const reviews = data.reviews || [];
+
+        document.title = `${p.name} — StreetDoko`;
+
+        const discPct = p.original_price ? Math.round((1 - p.price / p.original_price) * 100) : null;
+        const avgRating = reviews.length ? (reviews.reduce((s, r) => s + r.rating, 0) / reviews.length).toFixed(1) : null;
+        const stars = r => '★'.repeat(Math.round(r)) + '☆'.repeat(5 - Math.round(r));
+
+        content.innerHTML = `
+          <div class="breadcrumb">
+            <a href="homepage.html">Home</a>
+            <span class="sep">›</span>
+            <a href="browse.html?trader=${p.trader_name.toLowerCase().replace(/\s+/g,'')}">
+              ${p.trader_name}
+            </a>
+            <span class="sep">›</span>
+            <span>${p.name}</span>
+          </div>
+
+          <div class="product-layout">
+            <div>
+              <div class="product-main-img">
+                ${discPct ? `<span class="product-badge-large">${discPct}% OFF</span>` : ''}
+              </div>
+              <div class="thumb-row">
+                <div class="thumb active"></div>
+                <div class="thumb"></div>
+                <div class="thumb"></div>
+              </div>
+
+              <div class="product-desc">
+                <h3>Product Description</h3>
+                <p>${p.description}</p>
+                ${p.weight ? `<p class="mt-12"><strong>Weight:</strong> ${p.weight}</p>` : ''}
+                ${p.allergens ? `<p class="mt-12"><strong>Allergens:</strong> ${p.allergens}</p>` : ''}
+              </div>
+
+              <div class="mt-32">
+                <h3>Click &amp; Collect Information</h3>
+                <div class="collect-info mt-12">
+                  <h5>Collection Rules</h5>
+                  <div class="collect-info-row">Available for collection: Wednesday, Thursday, Friday</div>
+                  <div class="collect-info-row">Slots run 09:00 – 13:00 in 30-minute windows</div>
+                  <div class="collect-info-row">Orders must be placed at least 24 hours in advance</div>
+                  <div class="collect-info-row">Maximum 20 orders per time slot</div>
+                  <div class="collect-info-row">Collection point: Market Hall, Town Centre</div>
+                </div>
+              </div>
+
+              ${reviews.length ? `
+              <div class="mt-32">
+                <h3>Customer Reviews</h3>
+                ${avgRating ? `
+                <div class="avg-rating mt-16">
+                  <div class="avg-rating-score">${avgRating}</div>
+                  <div class="avg-rating-right">
+                    <div class="avg-rating-stars">${stars(avgRating)}</div>
+                    <div class="avg-rating-label">${reviews.length} review${reviews.length !== 1 ? 's' : ''} · ${p.name}</div>
+                  </div>
+                </div>` : ''}
+                <div class="form-stack mt-16">
+                  ${reviews.map(r => `
+                  <div class="review-card">
+                    <div class="review-card-header">
+                      <div class="review-avatar">${r.user_name[0]}</div>
+                      <div>
+                        <div class="fw-600" style="font-size:14px;">${r.user_name}</div>
+                        ${r.location ? `<div class="text-xs text-muted">${r.location}</div>` : ''}
+                        <div class="stars">${stars(r.rating)}</div>
+                      </div>
+                    </div>
+                    <p class="text-sm">"${r.comment}"</p>
+                  </div>`).join('')}
+                </div>
+              </div>` : ''}
+            </div>
+
+            <div class="product-info">
+              <div class="trader-tag">${p.trader_name}</div>
+              <h1 class="product-title">${p.name}</h1>
+              <div class="product-sku">SKU: ${p.sku}</div>
+
+              <div class="product-price-big">
+                £${p.price.toFixed(2)}
+                <span class="text-muted" style="font-size:1rem;font-weight:400;">${p.weight ? '/ ' + p.weight : ''}</span>
+              </div>
+              ${p.original_price ? `
+              <div class="product-price-orig">
+                Was £${p.original_price.toFixed(2)} &nbsp;
+                <span class="badge badge-red">${discPct}% OFF</span>
+              </div>` : ''}
+
+              ${avgRating ? `
+              <div class="avg-rating mt-16">
+                <div class="avg-rating-score">${avgRating}</div>
+                <div class="avg-rating-right">
+                  <div class="avg-rating-stars">${stars(avgRating)}</div>
+                  <div class="avg-rating-label">${reviews.length} reviews</div>
+                </div>
+              </div>` : ''}
+
+              <div class="stock-row">
+                ${p.stock_qty > 5
+                  ? `<div class="stock-dot"></div><span class="fw-600" style="font-size:13px;">In Stock</span>`
+                  : p.stock_qty > 0
+                  ? `<div class="stock-dot" style="background:#f59e0b;"></div><span class="fw-600" style="font-size:13px;">Low Stock</span>`
+                  : `<div class="stock-dot" style="background:#ef4444;"></div><span class="fw-600" style="font-size:13px;">Out of Stock</span>`
+                }
+                <span class="text-muted" style="font-size:13px;">— ${p.stock_qty} remaining</span>
+              </div>
+
+              <div class="qty-block">
+                <div class="qty-label">Quantity</div>
+                <div class="qty-range">Min: 1 &nbsp;|&nbsp; Max: 6 per order</div>
+                <div class="qty-stepper">
+                  <button class="qty-btn" onclick="changeQty(-1)">−</button>
+                  <input class="qty-input" type="number" id="qty" value="1" min="1" max="6" readonly />
+                  <button class="qty-btn" onclick="changeQty(1)">+</button>
+                </div>
+              </div>
+
+              <button class="add-basket-btn" id="addBtn" onclick="addToBasket()" ${p.stock_qty <= 0 ? 'disabled' : ''}>
+                Add to Basket — £${p.price.toFixed(2)}
+              </button>
+
+              <a href="checkout.html" class="btn btn-ghost btn-full mb-16">View Basket</a>
+
+              <div class="collect-info">
+                <h5>Click &amp; Collect</h5>
+                <div class="collect-info-row">Wed – Fri, 09:00 – 13:00</div>
+                <div class="collect-info-row">Book 24 hrs in advance</div>
+                <div class="collect-info-row">Market Hall, Town Centre</div>
+              </div>
+            </div>
+          </div>`;
+
+        // Load related products
+        loadRelated(p);
+
+      } catch (err) {
+        API.showError(content, 'Could not load product. ' + err.message);
+      }
+    }
+
+    async function loadRelated(product) {
+      const section = document.getElementById('related-section');
+      const grid    = document.getElementById('related-grid');
+      const title   = document.getElementById('related-title');
+      section.style.display = '';
+      title.textContent = `More from ${product.trader_name}`;
+
+      try {
+        const data = await API.getProducts({ trader: product.trader_name.toLowerCase().replace(/the\s*/i,'').trim() });
+        const related = data.items.filter(p => p.product_id != product.product_id).slice(0, 4);
+        grid.innerHTML = related.map(p => `
+          <div class="product-card card-hover">
+            <div class="product-card-img"></div>
+            <div class="product-card-body">
+              <div class="product-card-cat">${p.category}</div>
+              <div class="product-card-name">${p.name}</div>
+              <div class="product-price"><span class="price">£${p.price.toFixed(2)}</span></div>
+            </div>
+            <div class="product-card-footer">
+              <span class="badge badge-${p.stock_qty > 5 ? 'green' : p.stock_qty > 0 ? 'light' : 'red'}">${p.stock_qty > 5 ? 'In Stock' : p.stock_qty > 0 ? 'Low Stock' : 'Out of Stock'}</span>
+              <button class="btn btn-primary btn-sm" onclick="API.cart.add(${JSON.stringify(p).replace(/"/g,"'")})">Add</button>
+            </div>
+          </div>`).join('') || '<p class="text-sm text-muted">No related products found.</p>';
+      } catch {}
+    }
+
+    function changeQty(delta) {
+      qty = Math.min(6, Math.max(1, qty + delta));
+      document.getElementById('qty').value = qty;
+      if (currentProduct) {
+        document.getElementById('addBtn').textContent = `Add to Basket — £${(qty * currentProduct.price).toFixed(2)}`;
+      }
+    }
+
+    function addToBasket() {
+      if (!currentProduct) return;
+      API.cart.add(currentProduct, qty);
+      const btn = document.getElementById('addBtn');
+      btn.textContent = '✓ Added to Basket';
+      setTimeout(() => {
+        btn.textContent = `Add to Basket — £${(qty * currentProduct.price).toFixed(2)}`;
+      }, 1500);
+    }
+
+    loadProduct();
+  </script>
+</body>
+</html>

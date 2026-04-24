@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Access Your Account — StreetDoko</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <script src="api.js"></script>
+
+  <div class="signin-page">
+
+    <nav class="signin-nav">
+      <div class="signin-nav-brand">Street<span>Doko</span></div>
+      <a href="browse.html" class="btn btn-outline-white btn-sm">Browse Products</a>
+    </nav>
+
+    <div class="signin-hero">
+      <div class="hero-tagline">Welcome back</div>
+      <h1>Access Your Account</h1>
+      <p>Sign in to your existing account or create a new one to start shopping.</p>
+    </div>
+
+    <div class="signin-cards-wrap">
+      <div class="signin-option-card">
+        <h3>Returning Customer</h3>
+        <p>Already have an account? Sign in to browse, order, and manage your collections.</p>
+        <a href="login.html" class="btn btn-primary btn-full">Sign In</a>
+      </div>
+      <div class="signin-option-card">
+        <h3>New to StreetDoko?</h3>
+        <p>Create a free account to access fresh produce from local traders near you.</p>
+        <a href="register.html" class="btn btn-outline btn-full">Register Now</a>
+      </div>
+    </div>
+
+    <div class="admin-card-wrap">
+      <div class="admin-card">
+        <div class="admin-card-text" style="flex:1;">
+          <h4>Trader Portal</h4>
+          <p>Sign in to manage your products, view orders, and access your dashboard.</p>
+        </div>
+        <a href="trader-login.html" class="btn btn-ghost btn-sm" style="color:#ccc; border-color:rgba(255,255,255,.2);">Trader Sign In</a>
+      </div>
+    </div>
+
+  </div>
+
+  <footer>
+    <div class="footer-bottom">
+      <div class="container footer-bottom-row">
+        <span>© 2026 StreetDoko. All rights reserved.</span>
+        <span style="display:flex; gap:20px;">
+          <a href="about.html" style="color:#666; font-size:12px;">About Us</a>
+          <a href="#" style="color:#666; font-size:12px;">Privacy Policy</a>
+          <a href="about.html" style="color:#666; font-size:12px;">Contact</a>
+        </span>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Redirect already-logged-in users
+    if (API.isLoggedIn()) window.location.href = 'homepage.html';
+  </script>
+</body>
+</html>

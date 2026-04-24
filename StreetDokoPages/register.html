@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Create Account — StreetDoko</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <nav class="auth-nav">
+    <a href="signin-landing.html" class="auth-nav-brand">Street<span>Doko</span></a>
+    <div style="display:flex; align-items:center; gap:10px;">
+      <span class="text-sm text-muted">Already have an account?</span>
+      <a href="login.html" class="btn btn-outline btn-sm">Sign In</a>
+    </div>
+  </nav>
+
+  <div class="reg-page">
+    <div class="reg-content">
+      <div class="reg-card">
+        <div class="auth-logo">Street<span>Doko</span></div>
+        <p class="auth-subtitle">Join thousands of customers shopping fresh, local produce</p>
+
+        <div class="tab-group mb-24" style="max-width:400px; margin-inline:auto;">
+          <button class="tab-btn active" id="tab-customer" onclick="switchTab('customer')">Customer</button>
+          <button class="tab-btn" id="tab-trader" onclick="switchTab('trader')">Trader</button>
+        </div>
+
+        <div class="card">
+          <div id="error-msg" class="api-error" style="display:none;"></div>
+
+          <div id="trader-notice" style="display:none;" class="trader-badge mb-24">
+            Trader applications are reviewed by our admin team before activation. You'll receive a confirmation email once approved.
+          </div>
+
+          <div class="form-stack">
+            <div class="section-divider">Personal Details</div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="first-name">First Name *</label>
+                <input class="form-control" type="text" id="first-name" placeholder="Jane" required />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="last-name">Last Name *</label>
+                <input class="form-control" type="text" id="last-name" placeholder="Smith" required />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="email">Email Address *</label>
+              <input class="form-control" type="email" id="email" placeholder="you@example.com" required />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="phone">Phone Number</label>
+              <input class="form-control" type="tel" id="phone" placeholder="+44 7700 900000" />
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="password">Password *</label>
+                <input class="form-control" type="password" id="password" placeholder="Min. 8 characters" required />
+                <span class="form-hint">At least 8 characters required</span>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="confirm-password">Confirm Password *</label>
+                <input class="form-control" type="password" id="confirm-password" placeholder="Repeat password" required />
+              </div>
+            </div>
+
+            <div id="trader-extras">
+              <div class="section-divider mt-8">Shop Details</div>
+              <div class="form-group mt-16">
+                <label class="form-label" for="shop-name">Shop / Business Name *</label>
+                <input class="form-control" type="text" id="shop-name" placeholder="e.g. Green Valley Meats" />
+              </div>
+              <div class="form-group mt-16">
+                <label class="form-label" for="shop-cat">Shop Category *</label>
+                <select class="form-control" id="shop-cat">
+                  <option value="" disabled selected>Select a category…</option>
+                  <option>The Butcher</option>
+                  <option>Greengrocer</option>
+                  <option>Fishmonger</option>
+                  <option>The Bakery</option>
+                  <option>Delicatessen</option>
+                </select>
+              </div>
+              <div class="form-group mt-16">
+                <label class="form-label" for="shop-desc">Short Shop Description</label>
+                <textarea class="form-control" id="shop-desc" rows="2" placeholder="A brief description of your shop…"></textarea>
+              </div>
+              <div class="form-group mt-16">
+                <label class="form-label" for="address">Business Address *</label>
+                <input class="form-control" type="text" id="address" placeholder="123 Market Street, Town" />
+              </div>
+              <div class="form-group mt-16">
+                <label class="form-label" for="postcode">Postcode *</label>
+                <input class="form-control" type="text" id="postcode" placeholder="AB12 3CD" />
+              </div>
+            </div>
+
+            <div class="section-divider">Agreement</div>
+
+            <div class="form-check">
+              <input type="checkbox" id="terms" />
+              <label for="terms">I agree to the <a href="#">Terms and Conditions</a> and <a href="#">Privacy Policy</a></label>
+            </div>
+
+            <div class="form-check" id="trader-terms-row" style="display:none;">
+              <input type="checkbox" id="trader-terms" />
+              <label for="trader-terms">I confirm this is a legitimate independent business operating in compliance with local regulations</label>
+            </div>
+
+            <button class="btn btn-primary btn-full btn-lg" id="registerBtn" onclick="handleRegister()">
+              Create Account
+            </button>
+          </div>
+        </div>
+
+        <p class="text-center text-sm text-muted mt-16">
+          Already have an account? <a href="login.html" class="fw-600">Sign in here</a>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-bottom">
+      <div class="container footer-bottom-row">
+        <span>© 2026 StreetDoko. All rights reserved.</span>
+        <span style="display:flex; gap:20px;">
+          <a href="#" style="color:#666; font-size:12px;">Privacy Policy</a>
+          <a href="about.html" style="color:#666; font-size:12px;">Contact</a>
+        </span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="api.js"></script>
+  <script>
+    let currentTab = 'customer';
+
+    function switchTab(tab) {
+      currentTab = tab;
+      const isTrader = tab === 'trader';
+      document.getElementById('tab-customer').classList.toggle('active', !isTrader);
+      document.getElementById('tab-trader').classList.toggle('active', isTrader);
+      document.getElementById('trader-notice').style.display = isTrader ? 'block' : 'none';
+      document.getElementById('trader-extras').classList.toggle('show', isTrader);
+      document.getElementById('trader-terms-row').style.display = isTrader ? 'flex' : 'none';
+      document.getElementById('registerBtn').textContent = isTrader ? 'Submit Trader Application' : 'Create Account';
+    }
+
+    if (new URLSearchParams(window.location.search).get('tab') === 'trader') switchTab('trader');
+
+    async function handleRegister() {
+      const errEl = document.getElementById('error-msg');
+      const btn   = document.getElementById('registerBtn');
+      errEl.style.display = 'none';
+
+      const terms = document.getElementById('terms').checked;
+      if (!terms) { showErr('Please agree to the Terms and Conditions to continue.'); return; }
+
+      const email  = document.getElementById('email').value.trim();
+      const pwd    = document.getElementById('password').value;
+      const cpwd   = document.getElementById('confirm-password').value;
+      const fname  = document.getElementById('first-name').value.trim();
+      const lname  = document.getElementById('last-name').value.trim();
+
+      if (!email || !pwd || !fname || !lname) { showErr('Please fill in all required fields.'); return; }
+      if (pwd !== cpwd) { showErr('Passwords do not match.'); return; }
+      if (pwd.length < 8) { showErr('Password must be at least 8 characters.'); return; }
+
+      if (currentTab === 'trader') {
+        const traderTerms = document.getElementById('trader-terms').checked;
+        if (!traderTerms) { showErr('Please confirm your business compliance.'); return; }
+        const shopName = document.getElementById('shop-name').value.trim();
+        const shopCat  = document.getElementById('shop-cat').value;
+        if (!shopName || !shopCat) { showErr('Please fill in your shop details.'); return; }
+      }
+
+      const payload = {
+        first_name: fname, last_name: lname,
+        email, password: pwd,
+        phone: document.getElementById('phone').value.trim(),
+        role: currentTab,
+      };
+
+      if (currentTab === 'trader') {
+        payload.shop_name     = document.getElementById('shop-name').value.trim();
+        payload.shop_category = document.getElementById('shop-cat').value;
+        payload.shop_desc     = document.getElementById('shop-desc').value.trim();
+        payload.address       = document.getElementById('address').value.trim();
+        payload.postcode      = document.getElementById('postcode').value.trim();
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Creating account…';
+
+      try {
+        await API.register(payload);
+        window.location.href = 'homepage.html';
+      } catch (err) {
+        showErr(err.message || 'Registration failed. Please try again.');
+        btn.disabled = false;
+        btn.textContent = currentTab === 'trader' ? 'Submit Trader Application' : 'Create Account';
+      }
+    }
+
+    function showErr(msg) {
+      const el = document.getElementById('error-msg');
+      el.textContent = msg;
+      el.style.display = 'block';
+    }
+  </script>
+</body>
+</html>
